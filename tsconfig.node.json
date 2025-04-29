@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "moduleResolution": "nodenext",
+    "outDir": "dist",
+    "module": "NodeNext"
+  },
+  "extends": "./tsconfig.json",
+  "include": ["src/hono/**/*.ts", "src/electron/**/*.ts"],
+  "exclude": [
+    "src/hono/**/*.spec.ts",
+    "src/hono/**/*.test.ts",
+    "src/electron/**/*.spec.ts",
+    "src/electron/**/*.test.ts",
+    "node_modules"
+  ]
+}
