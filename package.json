@@ -5,22 +5,42 @@
   "main": "dist/main.js",
   "scripts": {
     "main": "node dist/main.js",
-    "server-dev": "node dist/server.js"
+    "server-dev": "node dist/server.js",
+    "dev:client": "vite dev --config client/vite.config.ts",
+    "dev:server": "vite dev --config server/vite.config.ts",
+    "build:client": "vite build --config client/vite.config.ts",
+    "build:server": "vite build --config server/vite.config.ts",
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "preview": "vite preview"
   },
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "@vitejs/plugin-vue": "^5.2.3",
     "electron": "^35.2.1",
+    "element-plus": "^2.9.9",
+    "jsdom": "^26.1.0",
+    "less": "^4.3.0",
+    "pinia": "^3.0.2",
+    "sass-embedded": "^1.87.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.3",
-    "vitest": "^3.1.2"
+    "vite-plugin-vue-devtools": "^7.7.6",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.1.2",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1",
+    "vue-tsc": "^2.2.10"
   },
   "dependencies": {
     "@hono/arktype-validator": "^2.0.0",
     "@hono/node-server": "^1.14.1",
     "arktype": "^2.1.20",
-    "hono-openapi": "^0.4.6"
+    "hono-openapi": "^0.4.6",
+    "ky": "^1.8.1"
   }
 }

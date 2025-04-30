@@ -1,6 +1,0 @@
-{
-  "compilerOptions": { "composite": true },
-  "extends": "./tsconfig.json",
-  "include": ["src/vue/**/*.ts"],
-  "exclude": ["src/vue/**/*.spec.ts", "src/vue/**/*.test.ts", "node_modules"]
-}
