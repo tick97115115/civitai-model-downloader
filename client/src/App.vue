@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import type { ModelId, ModelsRequestOpts } from "@shared/types/models_endpoint";
 import { models_response } from "@shared/types/models_endpoint";
-import { validate_all_records } from "@shared/types/models/__test__/load_data_list";
+// import { validate_all_records } from "@shared/types/models/__test__/load_data_list";
 import { type } from "arktype";
 import { ElMessage } from "element-plus";
 import { ref } from "vue";
 import ky from "ky";
-import { fa } from "element-plus/es/locale/index.mjs";
+import { useModelDetailStore } from "@/stores/modelDetail";
+import ModelDetailCard from "./components/ModelDetailCard.vue";
+import Searchbar from "./components/Searchbar.vue";
+import { storeToRefs } from "pinia";
 
-import ModelDetailCard from "@/conponents/ModelDetailCard.vue";
+const modelDetailStore = useModelDetailStore();
+const { modelId, modelDetailCardDisplay } = storeToRefs(modelDetailStore);
+const { setModelId, setModelDetailCardDisplay } = modelDetailStore;
 
 const loading = ref(false);
 
@@ -16,7 +21,6 @@ async function print() {
   console.log("23");
 }
 
-const input3 = ref("");
 const select = ref("");
 const MODELS_ENDPOINT = "https://civitai.com/api/v1/models";
 
@@ -116,7 +120,13 @@ async function load() {
           v-for="model_id in model_ids"
           :key="model_id.id"
         >
-          <el-card shadow="hover" @click="modelDetailCardDisplay = true">
+          <el-card
+            shadow="hover"
+            @click="
+              setModelDetailCardDisplay(true);
+              setModelId(model_id);
+            "
+          >
             <template #header>{{ model_id.name }}</template>
             <video
               v-if="model_id.modelVersions[0]?.images[0]?.type !== 'image'"
@@ -125,11 +135,11 @@ async function load() {
               loop
               :src="model_id.modelVersions[0]?.images[0]?.url ?? null"
             ></video>
-            <img
+            <el-image
               v-else
-              loading="lazy"
+              lazy
               :src="model_id.modelVersions[0]?.images[0]?.url ?? null"
-              style="width: 100%"
+              fit="cover"
             />
           </el-card>
         </el-col>
@@ -139,31 +149,8 @@ async function load() {
     <!-- <el-divider style="margin: 0%" /> -->
 
     <el-footer class="footer">
-      <el-dialog
-        v-model="modelDetailCardDisplay"
-        title="Shipping address"
-        width="800"
-      >
-      </el-dialog>
-      <el-input
-        v-model="input3"
-        placeholder="Please input"
-        class="input-with-select searchbar"
-      >
-        <template #prepend>
-          <el-select v-model="select" placeholder="Select" style="width: 115px">
-            <el-option label="Restaurant" value="1" />
-            <el-option label="Order No." value="2" />
-            <el-option label="Tel" value="3" />
-          </el-select>
-        </template>
-        <template #append>
-          <el-button @click="search()">
-            <template #icon>
-              <el-icon><Search /></el-icon> </template
-          ></el-button>
-        </template>
-      </el-input>
+      <ModelDetailCard></ModelDetailCard>
+      <Searchbar :search="search"></Searchbar>
     </el-footer>
   </el-container>
 </template>
@@ -175,8 +162,5 @@ async function load() {
   display: flex;
   justify-content: center;
   align-items: start;
-}
-.searchbar {
-  max-width: 600px;
 }
 </style>

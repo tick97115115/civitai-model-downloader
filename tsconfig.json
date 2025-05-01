@@ -12,9 +12,9 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./client/src/*"],
-      "@server/*": ["./server/src/*"],
-      "@shared/*": ["./shared/*"]
+      "@/*": ["client/src/*"],
+      "@server/*": ["server/src/*"],
+      "@shared/*": ["shared/*"]
     }
   },
   "exclude": ["node_modules", "dist"]
