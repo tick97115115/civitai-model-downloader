@@ -61,18 +61,19 @@ function extractFilenameFromUrl(url: string): string {
 // }
 
 export class ModelVersionLayout {
+  modelVersionPath: string;
   constructor(
     public basePath: string, 
     public modelVersion: ModelVersion,
     public imgDir: string
   ) {
-    this.basePath = normalize(basePath)
+    this.modelVersionPath = normalize(basePath)
     this.modelVersion = modelVersion
     this.imgDir = imgDir
   }
 
   getApiInfoJsonPath() :string {
-    return join(this.basePath, `${this.modelVersion.id}.api-info.json`)
+    return join(this.modelVersionPath, `${this.modelVersion.id}.api-info.json`)
   }
 
   findFile(fileId: number): ModelVersionFile {
@@ -87,7 +88,7 @@ export class ModelVersionLayout {
 
   getFilePath(fileId: number): string {
     const modelFile = this.findFile(fileId)
-    return join(join(this.basePath, `${fileId}_${sanitize(modelFile.name)}`))
+    return join(join(this.modelVersionPath, `${fileId}_${sanitize(modelFile.name)}`))
   }
  
   findImage(imageId: number): ModelVersionImage {
