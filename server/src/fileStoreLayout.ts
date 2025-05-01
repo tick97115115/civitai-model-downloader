@@ -61,13 +61,12 @@ function extractFilenameFromUrl(url: string): string {
 // }
 
 export class ModelVersionLayout {
-  modelVersionPath: string;
   constructor(
-    public basePath: string, 
+    public modelVersionPath: string, 
     public modelVersion: ModelVersion,
     public imgDir: string
   ) {
-    this.modelVersionPath = normalize(basePath)
+    this.modelVersionPath = normalize(modelVersionPath)
     this.modelVersion = modelVersion
     this.imgDir = imgDir
   }
@@ -112,7 +111,7 @@ export class ModelIdLayout {
   modelIdPath: string;
   constructor(public basePath: string, public modelId: ModelId) {
     this.modelIdPath = join(normalize(basePath), this.modelId.type, this.modelId.id.toString())
-    this.imgDir = join(this.basePath,'media')
+    this.imgDir = join(basePath,'media')
     this.modelId = modelId
   }
   
