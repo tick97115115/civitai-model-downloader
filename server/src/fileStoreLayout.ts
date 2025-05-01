@@ -108,8 +108,9 @@ export class ModelVersionLayout {
 
 export class ModelIdLayout {
   imgDir: string;
+  modelIdPath: string;
   constructor(public basePath: string, public modelId: ModelId) {
-    this.basePath = normalize(basePath)
+    this.modelIdPath = join(normalize(basePath), this.modelId.type, this.modelId.id.toString())
     this.imgDir = join(this.basePath,'media')
     this.modelId = modelId
   }
@@ -124,17 +125,13 @@ export class ModelIdLayout {
    return modelVersion
   }
 
-  getModelIdDir(): string {
-    return join(this.basePath, this.modelId.type, this.modelId.id.toString());
-  }
-
   getApiInfoJsonPath(): string {
-    return join(this.getModelIdDir(), `${this.modelId.id}.api-info.json`)
+    return join(this.modelIdPath, `${this.modelId.id}.api-info.json`)
   }
 
   getModelVersionLayout(versionId: number) {
     return new ModelVersionLayout(
-      join(this.getModelIdDir(), versionId.toString()), 
+      join(this.modelIdPath, versionId.toString()), 
       this.findModelVersion(versionId),
       this.imgDir
     )
