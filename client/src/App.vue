@@ -8,10 +8,10 @@ import { type } from "arktype";
 import { ElMessage } from "element-plus";
 import { ref, reactive } from "vue";
 import ky from "ky";
-import { useModelDetailStore } from "@/stores/modelDetail";
 import ModelDetailCard from "./components/ModelDetailCard.vue";
 import Searchbar from "./components/Searchbar.vue";
 // import { storeToRefs } from "pinia";
+import ModelCard from "@/components/ModelCard.vue";
 import { trpcClient } from "@/utils/trpcClient";
 
 async function testTrpc() {
@@ -21,10 +21,6 @@ async function testTrpc() {
     type: "success",
   });
 }
-
-const modelDetailStore = useModelDetailStore();
-// const { modelId, modelDetailCardDisplay } = storeToRefs(modelDetailStore);
-const { setModelId, setModelDetailCardDisplay } = modelDetailStore;
 
 const loading = ref(false);
 
@@ -41,6 +37,7 @@ if (out instanceof type.errors) {
   throw new Error("search params invalid!");
 }
 const search_params = reactive(out);
+const infiniteScrollDisabled = ref(true);
 async function search() {
   loading.value = true;
   const gallery_ele = document.querySelector("#gallery") as HTMLElement;
@@ -85,6 +82,7 @@ async function search() {
       console.log(next_page.value);
     }
     loading.value = false;
+    infiniteScrollDisabled.value = false;
   } catch (error) {
     ElMessage({
       message: String(error),
@@ -100,9 +98,9 @@ async function load() {
   console.log("load more");
   loading.value = true;
   if (next_page.value === null) {
-    await search();
-
     loading.value = false;
+    infiniteScrollDisabled.value = true;
+    console.log("No more data can be loaded.");
     return;
   }
   const res = await ky.get(next_page.value);
@@ -143,6 +141,7 @@ async function load() {
         id="gallery"
         :gutter="10"
         v-infinite-scroll="load"
+        :infinite-scroll-disabled="infiniteScrollDisabled"
         infinite-scroll-distance="50"
         infinite-scroll-immediate="false"
         style="overflow: auto; height: 86vh"
@@ -156,28 +155,7 @@ async function load() {
           v-for="model_id in model_ids"
           :key="model_id.id"
         >
-          <el-card
-            shadow="hover"
-            @click="
-              setModelDetailCardDisplay(true);
-              setModelId(model_id);
-            "
-          >
-            <template #header>{{ model_id.name }}</template>
-            <video
-              v-if="model_id.modelVersions[0]?.images[0]?.type !== 'image'"
-              style="width: 100%"
-              autoplay
-              loop
-              :src="model_id.modelVersions[0]?.images[0]?.url ?? null"
-            ></video>
-            <el-image
-              v-else
-              lazy
-              :src="model_id.modelVersions[0]?.images[0]?.url ?? null"
-              fit="cover"
-            />
-          </el-card>
+          <ModelCard :model-id="model_id"></ModelCard>
         </el-col>
       </el-row>
     </el-main>

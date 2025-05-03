@@ -7,7 +7,7 @@ import {pathExists} from 'path-exists';
 import {writeJsonFile} from 'write-json-file';
 import ky from "ky";
 import { EnvHttpProxyAgent } from 'undici'
-import { url } from "inspector";
+import { hasSafetensorsFile } from "./utils";
 
 // @ts-ignore
 const kyWithProxy = ky.extend({ dispatcher: new EnvHttpProxyAgent({httpsProxy: 'http://127.0.0.1:17890', noProxy: 'localhost'}) })
@@ -134,6 +134,28 @@ export const appRouter = router({
       return {
         downloadUrl: res.url
       }
+    }),
+    checkIfModelIdOnDiskAndIfLatest: publicProcedure.input(type({
+      modelId: model_id
+    })).mutation(async (params) => {
+      const milayout = new ModelIdLayout(BASE_PATH, params.input.modelId)
+      const newestMVLayout = milayout.getModelVersionLayout(params.input.modelId.modelVersions[0].id)
+      const result = {
+        onDisk: false,
+        hasNewest: false
+      }
+      if (await pathExists(milayout.modelIdPath) && await hasSafetensorsFile(milayout.modelIdPath)) {
+        result.onDisk = true
+      }
+      for (let index = 0; index < newestMVLayout.modelVersion.files.length; index++) {
+        const element = newestMVLayout.modelVersion.files[index];
+        const filePath = newestMVLayout.getFilePath(element.id)
+        if (await pathExists(filePath)) {
+          result.hasNewest = true
+          break
+        }
+      }
+      return result
     })
 });
 
