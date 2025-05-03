@@ -1,13 +1,14 @@
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
+import { models_request_opts } from "@shared/types/models_endpoint";
+import { type } from "arktype";
 
-export const useCounterStore = defineStore('counter', () => {
-  const query = ref("");
-  const limit =ref(20);
-  // const page = ref(1);
-  const tag = ref('')
-  const username = ref('')
-  
+export const useSearchParamsStore = defineStore('counter', () => {
+  const out = models_request_opts({})
+  if (out instanceof type.errors) {
+    throw new Error('search params invalid!')
+  }
+  const search_params = reactive(out);
 
-  return { search_text: query }
+  return { search_params }
 })

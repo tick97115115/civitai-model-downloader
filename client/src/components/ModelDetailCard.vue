@@ -10,12 +10,109 @@ import {
   Download,
   Picture,
 } from "@element-plus/icons-vue";
-import type { ModelId, ModelsRequestOpts } from "@shared/types/models_endpoint";
+import type { ModelId, ModelVersion } from "@shared/types/models_endpoint";
 import { storeToRefs } from "pinia";
 import { TabsPaneContext, ElMessage, ElNotification } from "element-plus";
 import { useModelDetailStore } from "@/stores/modelDetail";
 import { ref } from "vue";
+import { trpcClient } from "@/utils/trpcClient";
+import { Client } from "@gopeed/rest";
+import ky from "ky";
 
+const CivtAI_Token = "d250ad5b931cd1ab4895b66ae2d42149";
+const gopeedClient = new Client({
+  host: "http://127.0.0.1:9999",
+  token: "",
+});
+
+async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
+  // download files
+  modelVersion.files.map(async (file, index) => {
+    const info = await trpcClient.getFilePath.mutate({
+      modelId: modelId,
+      versionId: modelVersion.id,
+      fileId: file.id,
+    });
+    if (info.isExists === false) {
+      const url = `${file.downloadUrl}?token=${CivtAI_Token}`;
+
+      const res = await trpcClient.getFileResourceUrl.query({ url: url });
+      await gopeedClient.createTask({
+        req: { url: res.downloadUrl },
+        opt: { name: info.fileName, path: info.fileDirPath },
+      });
+    }
+  });
+  modelVersion.images.map(async (image, index) => {
+    const info = await trpcClient.getImagePath.mutate({
+      modelId: modelId,
+      versionId: modelVersion.id,
+      imageId: image.id,
+    });
+    if (info.isExists === false) {
+      await gopeedClient.createTask({
+        req: { url: image.url },
+        opt: { path: info.imageFileDirPath, name: info.imageFileName },
+      });
+    }
+  });
+
+  await trpcClient.saveModelIdApiInfo.mutate({
+    modelId,
+  });
+
+  await trpcClient.saveModelVersionApiInfo.mutate({
+    modelId,
+    versionId: modelVersion.id,
+  });
+
+  ElMessage({
+    message: `Added all resource into task list.`,
+    type: "success",
+  });
+}
+
+async function getFilePath(
+  modelId: ModelId,
+  modelVersionId: number,
+  fileId: number
+) {
+  const info = await trpcClient.getFilePath.mutate({
+    modelId: modelId,
+    versionId: modelVersionId,
+    fileId: fileId,
+  });
+  ElMessage({
+    message: `Trpc Connected! ${info.filePath}!`,
+    type: "success",
+  });
+}
+
+async function getModelIdApiInfoJsonPath(modelId: ModelId) {
+  const info = await trpcClient.getModelIdApiInfoJsonPath.mutate({
+    modelId: modelId,
+  });
+  ElMessage({
+    message: `Trpc Connected! ${info.modelIdApiInfoJsonPath}!`,
+    type: "success",
+  });
+}
+
+async function getImagePath(
+  modelId: ModelId,
+  versionId: number,
+  imgId: number
+) {
+  const info = await trpcClient.getImagePath.mutate({
+    modelId: modelId,
+    versionId: versionId,
+    imageId: imgId,
+  });
+  ElMessage({
+    message: `Trpc Connected! ${info.imagePath}!`,
+    type: "success",
+  });
+}
 const modelDetailStore = useModelDetailStore();
 const { modelId, modelDetailCardDisplay, activeVersionId } =
   storeToRefs(modelDetailStore);
@@ -35,12 +132,12 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
     <el-card v-if="modelId !== null">
       <template #header>
         <div class="card-header">
-          <!-- <h2>{{ modelId?.name }}</h2> -->
           <a
             class="clickable-title"
             target="_blank"
-            :href="`https://civitai.com/models/${modelId.id}`"
-          ></a>
+            :href="`https://civitai.com/models/${modelId.id}?modelVersionId=${activeVersionId}`"
+            >{{ modelId.name }}</a
+          >
         </div>
       </template>
       <el-tabs
@@ -136,16 +233,46 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
                   </el-descriptions-item>
                 </el-descriptions>
 
-                <el-button type="primary" round :icon="Download"
+                <el-button
+                  type="primary"
+                  round
+                  :icon="Download"
+                  @click="
+                    getFilePath(
+                      modelId,
+                      modelVersion.id,
+                      modelVersion.files[0].id
+                    )
+                  "
                   >Save Model</el-button
                 >
-                <el-button type="primary" round :icon="Picture"
+                <el-button
+                  type="primary"
+                  round
+                  :icon="Picture"
+                  @click="
+                    getImagePath(
+                      modelId,
+                      modelVersion.id,
+                      modelVersion.images[0].id
+                    )
+                  "
                   >Save Images</el-button
                 >
-                <el-button type="primary" round :icon="Document"
+                <el-button
+                  type="primary"
+                  round
+                  :icon="Document"
+                  @click="getModelIdApiInfoJsonPath(modelId)"
                   >Save Info</el-button
                 >
-                <el-button type="success" round :icon="Box">Save All</el-button>
+                <el-button
+                  type="success"
+                  round
+                  :icon="Box"
+                  @click="downloadAll(modelId, modelVersion)"
+                  >Save All</el-button
+                >
               </el-space>
             </el-col>
           </el-row>

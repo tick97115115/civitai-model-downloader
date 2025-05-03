@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { reactive } from "vue";
+import { ModelsRequestOpts } from "@shared/types/models_endpoint";
 
 defineProps<{
   search(): Promise<any>;
+  search_params: ModelsRequestOpts;
 }>();
 </script>
 
 <template>
-  <el-input placeholder="Please input" class="input-with-select searchbar">
+  <el-input
+    placeholder="Please input"
+    v-model="search_params.query"
+    class="input-with-select searchbar"
+  >
     <!-- <template #prepend>
           <el-select v-model="select" placeholder="Select" style="width: 115px">
             <el-option label="Restaurant" value="1" />

@@ -1,13 +1,25 @@
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
+import { serve } from '@hono/node-server'
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { trpcServer } from '@hono/trpc-server' // Deno 'npm:@hono/trpc-server'
+import { appRouter } from './trpc'
 
-const app = new Hono();
-app.get("/", (c) => c.text("Hono meets Node.js"));
+const app = new Hono()
 
-const server = serve(app, (info) => {
-  console.log(`Listening on http://localhost:${info.port}`); // Listening on http://localhost:3000
-});
+app.use('/*', cors())
 
-if (server.address() !== null) {
-  console.log(`server address: ${server.address()?.toString()}`);
-}
+app.use(
+  '/trpc/*',
+  trpcServer({
+    router: appRouter,
+  })
+)
+
+export default app
+
+serve({
+  fetch: app.fetch,
+  port: 8787,
+}, (info) => {
+  console.log(`server runs at: ${info.address}:${info.port}`)
+})

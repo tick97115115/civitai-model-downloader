@@ -7,6 +7,7 @@ import type {
   ModelVersionFile,
   ModelVersionImage,
 } from "@shared/types/models_endpoint";
+import ky from "ky";
 
 /**
  * The layout of directory:
@@ -71,8 +72,16 @@ export class ModelVersionLayout {
     this.imgDir = imgDir
   }
 
+  getApiInfoJsonFileDirPath(): string {
+    return this.modelVersionPath
+  }
+
+  getApiInfoJsonFileName(): string {
+    return `${this.modelVersion.id}.api-info.json`
+  }
+
   getApiInfoJsonPath() :string {
-    return join(this.modelVersionPath, `${this.modelVersion.id}.api-info.json`)
+    return join(this.getApiInfoJsonFileDirPath(), this.getApiInfoJsonFileName())
   }
 
   findFile(fileId: number): ModelVersionFile {
@@ -85,9 +94,18 @@ export class ModelVersionLayout {
     return file
   }
 
+  getFileName(fileId: number): string {
+    const modelFile = this.findFile(fileId)
+    return `${fileId}_${sanitize(modelFile.name)}`
+  }
+  
+  getFileDirPath(): string {
+    return this.modelVersionPath
+  }
+
   getFilePath(fileId: number): string {
     const modelFile = this.findFile(fileId)
-    return join(join(this.modelVersionPath, `${fileId}_${sanitize(modelFile.name)}`))
+    return join(join(this.getFileDirPath(), this.getFileName(fileId)))
   }
  
   findImage(imageId: number): ModelVersionImage {
@@ -100,9 +118,17 @@ export class ModelVersionLayout {
     return img
   }
 
-  getImagePath(imageId: number): string {
+  getImageFileName(imageId: number): string {
     const image = this.findImage(imageId)
-    return join(this.imgDir, extractFilenameFromUrl(image.url))
+    return extractFilenameFromUrl(image.url)
+  }
+
+  getImageFileDirPath(): string {
+    return this.imgDir
+  }
+
+  getImagePath(imageId: number): string {
+    return join(this.getImageFileDirPath(), this.getImageFileName(imageId))
   }
 }
 
@@ -125,8 +151,16 @@ export class ModelIdLayout {
    return modelVersion
   }
 
+  getApiInfoJsonFileDir(): string {
+    return this.modelIdPath
+  }
+
+  getApiInfoJsonFileName(): string {
+    return `${this.modelId.id}.api-info.json`
+  }
+
   getApiInfoJsonPath(): string {
-    return join(this.modelIdPath, `${this.modelId.id}.api-info.json`)
+    return join(this.getApiInfoJsonFileDir(), this.getApiInfoJsonFileName())
   }
 
   getModelVersionLayout(versionId: number) {
