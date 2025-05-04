@@ -12,15 +12,7 @@ import ModelDetailCard from "./components/ModelDetailCard.vue";
 import Searchbar from "./components/Searchbar.vue";
 // import { storeToRefs } from "pinia";
 import ModelCard from "@/components/ModelCard.vue";
-import { trpcClient } from "@/utils/trpcClient";
-
-async function testTrpc() {
-  const hello = await trpcClient.hello.query();
-  ElMessage({
-    message: `Trpc Connected! ${hello}!`,
-    type: "success",
-  });
-}
+import DownloadsView from "@/views/DownloadsView.vue";
 
 const loading = ref(false);
 
@@ -164,6 +156,7 @@ async function load() {
 
     <el-footer class="footer">
       <ModelDetailCard></ModelDetailCard>
+      <DownloadsView></DownloadsView>
       <Searchbar :search="search" :search_params="search_params"></Searchbar>
     </el-footer>
   </el-container>

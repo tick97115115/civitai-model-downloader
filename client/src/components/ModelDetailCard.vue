@@ -2,14 +2,11 @@
 import { storeToRefs } from "pinia";
 import { TabsPaneContext, ElMessage, ElNotification } from "element-plus";
 import { useModelDetailStore } from "@/stores/modelDetail";
+import { gopeedClient } from "@/utils/gopeedClient";
 
-import { Client } from "@gopeed/rest";
 import ModelDetailCardTabPane from "@/components/ModelDetailCardTabPane.vue";
 const CivtAI_Token = "d250ad5b931cd1ab4895b66ae2d42149";
-const gopeedClient = new Client({
-  host: "http://127.0.0.1:9999",
-  token: "",
-});
+
 const modelDetailStore = useModelDetailStore();
 const { modelId, modelDetailCardDisplay, activeVersionId } =
   storeToRefs(modelDetailStore);
