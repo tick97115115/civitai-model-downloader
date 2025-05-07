@@ -1,25 +1,38 @@
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-import { trpcServer } from '@hono/trpc-server' // Deno 'npm:@hono/trpc-server'
-import { appRouter } from './trpc'
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { trpcServer } from "@hono/trpc-server"; // Deno 'npm:@hono/trpc-server'
+import { RPCHandler } from "@orpc/server/fetch";
+import { OpenAPIHandler } from "@orpc/openapi/fetch";
+import { appRouter } from "./trpc";
+import { orpcRouter } from "./orpc";
 
-const app = new Hono()
+const app = new Hono();
 
-app.use('/*', cors())
+// const handler = new RPCHandler(orpcRouter);
+
+const handler = new OpenAPIHandler(orpcRouter);
+
+app.use("/*", cors());
+
+app.use("/rpc/*", async (c, next) => {
+  const { matched, response } = await handler.handle(c.req.raw, {
+    prefix: "/rpc",
+    context: {}, // Provide initial context if needed
+  });
+
+  if (matched) {
+    return c.newResponse(response.body, response);
+  }
+
+  await next();
+});
 
 app.use(
-  '/trpc/*',
+  "/trpc/*",
   trpcServer({
     router: appRouter,
   })
-)
+);
 
-export default app
-
-serve({
-  fetch: app.fetch,
-  port: 8787,
-}, (info) => {
-  console.log(`server runs at: ${info.address}:${info.port}`)
-})
+export default app;

@@ -3,6 +3,9 @@
   "compilerOptions": {
     "types": ["vite/client", "vitest"],
     "jsx": "preserve",
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "bundler",
     "isolatedModules": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],

@@ -13,6 +13,7 @@ import Searchbar from "./components/Searchbar.vue";
 // import { storeToRefs } from "pinia";
 import ModelCard from "@/components/ModelCard.vue";
 import DownloadsView from "@/views/DownloadsView.vue";
+import SettingsView from "@/views/SettingsView.vue";
 
 const loading = ref(false);
 
@@ -158,6 +159,7 @@ async function load() {
       <ModelDetailCard></ModelDetailCard>
       <DownloadsView></DownloadsView>
       <Searchbar :search="search" :search_params="search_params"></Searchbar>
+      <SettingsView></SettingsView>
     </el-footer>
   </el-container>
 </template>
