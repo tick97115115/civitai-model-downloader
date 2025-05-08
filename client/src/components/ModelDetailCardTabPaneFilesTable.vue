@@ -28,7 +28,9 @@ async function getSDWebuiLoraName(
     versionId: versionId,
     fileId: modelVersion.files[index].id,
   });
-  const loraString = `<lora:${removeFileExtension(info.fileName)}:1>`;
+  const loraString = `<lora:${removeFileExtension(
+    modelVersion.files[index].name
+  )}:1>`;
   await clipboard.write(loraString);
   ElMessage({
     message: `Copied!: \n${loraString}`,

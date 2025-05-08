@@ -2,6 +2,7 @@ import Conf from "conf";
 import { type } from "arktype";
 import ky, { KyInstance } from "ky";
 import { EnvHttpProxyAgent } from "undici";
+import "dotenv/config";
 
 export const _settingsValidator = type({
   basePath: "string",
@@ -52,13 +53,19 @@ function instantiateKy() {
 
 let kyWithProxy: KyInstance = instantiateKy();
 
+console.log(`this is http proxy address: ` + getSettings().httpProxy)
+
 export function getKy() {
   return kyWithProxy;
 }
 
 export function setSettings(newSettings: Partial<Settings>) {
+  settings.set({ ...currentSettings, ...newSettings });
   if (newSettings.httpProxy !== currentSettings.httpProxy) {
     kyWithProxy = instantiateKy();
   }
-  settings.set({ ...currentSettings, ...newSettings });
 }
+
+if (process.env.basePath && settings.get('basePath') !== process.env.basePath) {settings.set('basePath', process.env.basePath)}
+if (process.env.civitaiToken && settings.get('civitaiToken') !== process.env.civitaiToken) {settings.set('civitaiToken', process.env.civitaiToken)}
+if (process.env.httpProxy && settings.get('httpProxy') !== process.env.httpProxy) {settings.set('httpProxy', process.env.httpProxy)}

@@ -32,8 +32,10 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
     });
     if (info.isExists === false) {
       const url = `${file.downloadUrl}?token=${CivtAI_Token}`;
+      console.log(`this is the resource uri I get from trpc: ${url}`);
 
       const res = await trpcClient.getFileResourceUrl.query({ url: url });
+      console.log(`This is the resolved uri: ${res.downloadUrl}`);
       await gopeedClient.createTask({
         req: { url: res.downloadUrl },
         opt: { name: info.fileName, path: info.fileDirPath },
@@ -162,7 +164,7 @@ async function getImagePath(
         </el-space>
       </el-col>
       <el-col :xs="16" :sm="16">
-        <el-space direction="vertical" style="width: 100%" fill="true">
+        <el-space direction="vertical" style="width: 100%" :fill="true">
           <el-descriptions
             border
             title="Details"
