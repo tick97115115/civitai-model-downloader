@@ -29,3 +29,4 @@ export const orpcRouter = {
     set: setSettings,
   },
 };
+export type OrpcRouter = typeof orpcRouter;

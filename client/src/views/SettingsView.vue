@@ -3,14 +3,16 @@ import { Setting } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import * as _ from "lodash";
+import { orpc } from "@/utils/orpcClient";
 
 const dialogTableVisible = ref(false);
 
 async function getSettings() {
   // @ts-ignore
-  const dirHandler: string = await window.showDirectoryPicker();
+  // const dirHandler: string = await window.showDirectoryPicker();
+  const settingsInfo = await orpc.settings.get();
   ElMessage({
-    message: `dirPath: ${dirHandler}`,
+    message: `Base path: ${settingsInfo.basePath} | civitai token: ${settingsInfo.civitaiToken}`,
     type: "success",
   });
 }

@@ -1,4 +1,4 @@
-import { serve } from "@hono/node-server";
+// import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { trpcServer } from "@hono/trpc-server"; // Deno 'npm:@hono/trpc-server'
@@ -11,13 +11,13 @@ const app = new Hono();
 
 // const handler = new RPCHandler(orpcRouter);
 
-const handler = new OpenAPIHandler(orpcRouter);
-
 app.use("/*", cors());
 
-app.use("/rpc/*", async (c, next) => {
+const handler = new OpenAPIHandler(orpcRouter);
+
+app.use("/orpc/*", async (c, next) => {
   const { matched, response } = await handler.handle(c.req.raw, {
-    prefix: "/rpc",
+    prefix: "/orpc",
     context: {}, // Provide initial context if needed
   });
 

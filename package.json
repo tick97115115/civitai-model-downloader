@@ -6,7 +6,7 @@
   "scripts": {
     "main": "node dist/main.js",
     "dev:client": "vite dev --config client/vite.config.ts",
-    "dev:server": "tsx watch --include './server/*' ./server/dev.ts",
+    "dev:server": "tsx watch --include './server/*' ./server/src/dev.ts",
     "build:client": "vite build --config client/vite.config.ts",
     "build:server": "vite build --config server/vite.config.ts",
     "test": "vitest",
