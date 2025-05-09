@@ -1,11 +1,9 @@
 import { initTRPC } from "@trpc/server";
-import { type } from "arktype";
-import { model_id, model_version } from "@shared/types/models_endpoint";
-import { ModelIdLayout } from "../fileStoreLayout";
-import fileUrl from "file-url";
-import { pathExists } from "path-exists";
-import { writeJsonFile } from "write-json-file";
-import { getKy } from "@server/settings";
+import { mediaRouter } from "./media";
+import { modelFileRouter } from "./modelFile";
+import { modelIdRouter } from "./modelId";
+import { modelVersionRouter } from "./modelVersion";
+import { settingsRouter } from "./settings";
 
 /**
  * Initialization of tRPC backend
@@ -20,13 +18,12 @@ const t = initTRPC.create();
 export const publicProcedure = t.procedure;
 export const { createCallerFactory, router } = t;
 
-const BASE_PATH = String.raw`D:\AI_Drawer\civitai_models`;
-
 export const appRouter = router({
-  modelFile: {},
-  media: {},
-  modelId: {},
-  modelVersion: {},
+  modelFile: modelFileRouter,
+  media: mediaRouter,
+  modelId: modelIdRouter,
+  modelVersion: modelVersionRouter,
+  settings: settingsRouter,
 });
 
 // Export type router type signature,

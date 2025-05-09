@@ -1,11 +1,10 @@
 import { initTRPC } from "@trpc/server";
 import { type } from "arktype";
-import { model_id, model_version } from "@shared/types/models_endpoint";
+import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "./fileStoreLayout";
 import fileUrl from "file-url";
 import { pathExists } from "path-exists";
 import { writeJsonFile } from "write-json-file";
-import { EnvHttpProxyAgent } from "undici";
 import { hasSafetensorsFile } from "./utils";
 import { getKy } from "@server/settings";
 

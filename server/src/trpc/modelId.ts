@@ -1,17 +1,14 @@
-import { router, publicProcedure, createCallerFactory } from "./index";
-import { settingsRouter } from "./settings";
+import { router, publicProcedure } from "./index";
 import { type } from "arktype";
 import { pathExists } from "path-exists";
 import fileUrl from "file-url";
-import { model_id, model_version } from "@shared/types/models_endpoint";
+import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
 import { getSettings } from "@server/settings";
 import { writeJsonFile } from "write-json-file";
 import { hasSafetensorsFile } from "@server/utils";
 
-const settingsCaller = createCallerFactory(settingsRouter)({});
-
-export const modelFileRouter = router({
+export const modelIdRouter = router({
   getModelIdApiInfoJsonPath: publicProcedure
     .input(
       type({
@@ -19,9 +16,8 @@ export const modelFileRouter = router({
       })
     )
     .mutation(async (params) => {
-      const settings = await settingsCaller.getSettings();
       const milayout = new ModelIdLayout(
-        settings.basePath,
+        getSettings().basePath,
         params.input.modelId
       );
       const modelIdApiInfoJsonPath = milayout.getApiInfoJsonPath();
@@ -53,7 +49,10 @@ export const modelFileRouter = router({
       })
     )
     .mutation(async (params) => {
-      const milayout = new ModelIdLayout(BASE_PATH, params.input.modelId);
+      const milayout = new ModelIdLayout(
+        getSettings().basePath,
+        params.input.modelId
+      );
       const newestMVLayout = milayout.getModelVersionLayout(
         params.input.modelId.modelVersions[0].id
       );

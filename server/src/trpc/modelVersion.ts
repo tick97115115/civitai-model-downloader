@@ -1,16 +1,13 @@
-import { router, publicProcedure, createCallerFactory } from "./index";
-import { settingsRouter } from "./settings";
+import { router, publicProcedure } from "./index";
 import { type } from "arktype";
 import { pathExists } from "path-exists";
 import fileUrl from "file-url";
-import { model_id, model_version } from "@shared/types/models_endpoint";
+import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
 import { getSettings } from "@server/settings";
 import { writeJsonFile } from "write-json-file";
 
-const settingsCaller = createCallerFactory(settingsRouter)({});
-
-export const modelFileRouter = router({
+export const modelVersionRouter = router({
   getModelVersionApiInfoJsonPath: publicProcedure
     .input(
       type({

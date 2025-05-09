@@ -1,12 +1,12 @@
-import { router, publicProcedure, createCallerFactory } from "./index";
+import { router, publicProcedure } from "./index";
 import { type } from "arktype";
-import { model_id, model_version } from "@shared/types/models_endpoint";
+import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
 import fileUrl from "file-url";
 import { pathExists } from "path-exists";
 import { getSettings } from "@server/settings";
 
-export const modelFileRouter = router({
+export const mediaRouter = router({
   getImagePath: publicProcedure
     .input(
       type({

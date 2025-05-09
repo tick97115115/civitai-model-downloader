@@ -1,8 +1,8 @@
-import { router, publicProcedure, createCallerFactory } from "./index";
+import { router, publicProcedure } from "./index";
 import { type } from "arktype";
 import { pathExists } from "path-exists";
 import fileUrl from "file-url";
-import { model_id, model_version } from "@shared/types/models_endpoint";
+import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
 import { getSettings, getKy } from "@server/settings";
 
