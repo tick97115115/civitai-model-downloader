@@ -189,6 +189,12 @@ async function getImagePath(
               </template>
               {{ modelVersion.baseModel }}
             </el-descriptions-item>
+            <el-descriptions-item v-if="modelVersion.baseModelType">
+              <template #label>
+                <b>Model Series</b>
+              </template>
+              {{ modelVersion.baseModelType }}
+            </el-descriptions-item>
             <el-descriptions-item>
               <template #label>
                 <div>

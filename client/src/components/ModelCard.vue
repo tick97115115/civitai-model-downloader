@@ -46,6 +46,9 @@ const { setModelId, setModelDetailCardDisplay } = modelDetailStore;
       fit="cover"
     />
     <template #footer>
+      <el-tag effect="dark" type="primary">{{
+        `${modelId.modelVersions[0]?.baseModel}: ${modelId.modelVersions[0]?.baseModelType}`
+      }}</el-tag>
       <el-tag v-if="haveNewUpdate" type="warning">Have new version!</el-tag>
       <el-tag v-if="hasNewest" type="success">Up to date~</el-tag>
     </template>
