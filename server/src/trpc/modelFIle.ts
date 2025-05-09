@@ -1,4 +1,4 @@
-import { router, publicProcedure } from "./index";
+import { router, publicProcedure } from "./trpc";
 import { type } from "arktype";
 import { pathExists } from "path-exists";
 import fileUrl from "file-url";

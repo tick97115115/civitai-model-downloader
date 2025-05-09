@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import clipboard from "clipboardy";
+import { Picture, Document, Box, CopyDocument } from "@element-plus/icons-vue";
 import type { ModelId, ModelVersion } from "@shared/types/models_endpoint";
-import {
-  Delete,
-  Search,
-  Share,
-  Box,
-  CopyDocument,
-  Document,
-  Download,
-  Picture,
-} from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { trpcClient } from "@/utils/trpcClient";
 import type { Client } from "@gopeed/rest";
@@ -25,7 +16,7 @@ const { gopeedClient, modelId, CivtAI_Token } = defineProps<{
 async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
   // download files
   modelVersion.files.map(async (file, index) => {
-    const info = await trpcClient.getFilePath.mutate({
+    const info = await trpcClient.modelFile.getFilePath.mutate({
       modelId: modelId,
       versionId: modelVersion.id,
       fileId: file.id,
@@ -34,7 +25,9 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
       const url = `${file.downloadUrl}?token=${CivtAI_Token}`;
       console.log(`this is the resource uri I get from trpc: ${url}`);
 
-      const res = await trpcClient.getFileResourceUrl.query({ url: url });
+      const res = await trpcClient.modelFile.getFileResourceUrl.query({
+        url: url,
+      });
       console.log(`This is the resolved uri: ${res.downloadUrl}`);
       await gopeedClient.createTask({
         req: { url: res.downloadUrl },
@@ -43,7 +36,7 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
     }
   });
   modelVersion.images.map(async (image, index) => {
-    const info = await trpcClient.getImagePath.mutate({
+    const info = await trpcClient.media.getImagePath.mutate({
       modelId: modelId,
       versionId: modelVersion.id,
       imageId: image.id,
@@ -56,11 +49,11 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
     }
   });
 
-  await trpcClient.saveModelIdApiInfo.mutate({
+  await trpcClient.modelId.saveModelIdApiInfo.mutate({
     modelId,
   });
 
-  await trpcClient.saveModelVersionApiInfo.mutate({
+  await trpcClient.modelVersion.saveModelVersionApiInfo.mutate({
     modelId,
     versionId: modelVersion.id,
   });
@@ -76,7 +69,7 @@ async function getFilePath(
   modelVersionId: number,
   fileId: number
 ) {
-  const info = await trpcClient.getFilePath.mutate({
+  const info = await trpcClient.modelFile.getFilePath.mutate({
     modelId: modelId,
     versionId: modelVersionId,
     fileId: fileId,
@@ -88,7 +81,7 @@ async function getFilePath(
 }
 
 async function getModelIdApiInfoJsonPath(modelId: ModelId) {
-  const info = await trpcClient.getModelIdApiInfoJsonPath.mutate({
+  const info = await trpcClient.modelId.getModelIdApiInfoJsonPath.mutate({
     modelId: modelId,
   });
   ElMessage({
@@ -102,7 +95,7 @@ async function getImagePath(
   versionId: number,
   imgId: number
 ) {
-  const info = await trpcClient.getImagePath.mutate({
+  const info = await trpcClient.media.getImagePath.mutate({
     modelId: modelId,
     versionId: versionId,
     imageId: imgId,

@@ -11,7 +11,7 @@ const props = defineProps<{
 const haveNewUpdate = ref<boolean>(false);
 const hasNewest = ref<boolean>(false);
 onMounted(async () => {
-  const info = await trpcClient.checkIfModelIdOnDiskAndIfLatest.mutate({
+  const info = await trpcClient.modelId.checkIfModelIdOnDiskAndIfLatest.mutate({
     modelId: props.modelId,
   });
   haveNewUpdate.value = info.onDisk && !info.hasNewest;

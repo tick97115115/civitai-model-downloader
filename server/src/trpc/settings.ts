@@ -1,4 +1,4 @@
-import { router, publicProcedure } from "./index";
+import { router, publicProcedure } from "./trpc";
 import { type } from "arktype";
 import { _settingsValidator, setSettings, getSettings } from "@server/settings";
 

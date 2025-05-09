@@ -23,7 +23,7 @@ async function getSDWebuiLoraName(
   versionId: number,
   index: number
 ) {
-  const info = await trpcClient.getFilePath.mutate({
+  const info = await trpcClient.modelFile.getFilePath.mutate({
     modelId: modelId,
     versionId: versionId,
     fileId: modelVersion.files[index].id,
@@ -39,7 +39,7 @@ async function getSDWebuiLoraName(
 }
 
 async function downloadFile(index: number) {
-  const info = await trpcClient.getFilePath.mutate({
+  const info = await trpcClient.modelFile.getFilePath.mutate({
     modelId: modelId,
     versionId: modelVersion.id,
     fileId: modelVersion.files[index].id,
@@ -47,7 +47,9 @@ async function downloadFile(index: number) {
   if (info.isExists === false) {
     const url = `${modelVersion.files[index].downloadUrl}?token=${CivtAI_Token}`;
 
-    const res = await trpcClient.getFileResourceUrl.query({ url: url });
+    const res = await trpcClient.modelFile.getFileResourceUrl.query({
+      url: url,
+    });
     await gopeedClient.createTask({
       req: { url: res.downloadUrl },
       opt: { name: info.fileName, path: info.fileDirPath },

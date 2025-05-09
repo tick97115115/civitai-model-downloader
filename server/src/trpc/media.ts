@@ -1,4 +1,4 @@
-import { router, publicProcedure } from "./index";
+import { router, publicProcedure } from "./trpc";
 import { type } from "arktype";
 import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
