@@ -1,52 +1,51 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "./server/prisma/generated"
-}
-
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./db.sqlite3"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./src/prisma/generated"
 }
 
 model Model {
   id            Int            @id
   name          String
+  creator       String?
   type          String
   nsfw          Boolean
   nsfwLevel     Int
-  apiInfo       Json
   modelVersions ModelVersion[]
   tags          Tag[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  @@index([name, type])
+  @@index([name, type, creator, nsfw, nsfwLevel])
 }
 
 model Tag {
-  id     Int     @id
-  name   String
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
   models Model[]
 
   @@index([name])
 }
 
 model ModelVersion {
-  id            Int      @id
+  id            Int       @id
   modelId       Int
   name          String
   baseModel     String
   baseModelType String?
-  publishedAt   String
+  publishedAt   DateTime?
   nsfwLevel     Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  apiInfo       Json
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   model Model @relation(fields: [modelId], references: [id])
 
-  @@index([name, baseModel])
+  @@index([modelId, name, baseModel, baseModelType, publishedAt, nsfwLevel])
 }

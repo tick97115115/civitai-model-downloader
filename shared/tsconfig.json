@@ -2,7 +2,9 @@
   "extends": "../tsconfig",
   "compilerOptions": {
     "composite": true,
-    "outDir": "../dist/shared"
+    "outDir": "../dist/shared",
+    "strict": true,
+    "strictNullChecks": true,
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "**/__test__/**/*"]

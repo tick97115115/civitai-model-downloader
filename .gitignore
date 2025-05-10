@@ -134,3 +134,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+/server/src/prisma
+/server/db.sqlite3
+/server/db.sqlite3-journal
