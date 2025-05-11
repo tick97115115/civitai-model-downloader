@@ -133,6 +133,7 @@ export const models_request_opts = type({
   "allowCommercialUse?": allowCommercialUse.array(), // Filter to models based on their commercial permissions
   "nsfw?": "boolean", // If false, will return safer images and hide models that don't have safe images
   "supportsGeneration?": "boolean", // If true, will return models that support generation
+  "checkpointType?": checkpointType,
   "baseModels?": baseModels,
   "token?": "string", // required for search models
 });
