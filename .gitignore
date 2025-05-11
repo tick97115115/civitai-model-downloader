@@ -136,6 +136,6 @@ dist
 .pnp.*
 
 
-/server/src/prisma
+/server/src/prisma/generated
 /server/db.sqlite3
 /server/db.sqlite3-journal

@@ -2,8 +2,13 @@ import Conf from "conf";
 import { type } from "arktype";
 import ky, { KyInstance } from "ky";
 import { EnvHttpProxyAgent } from "undici";
+import { PrismaClient } from "@server/prisma/generated";
 import "dotenv/config";
 
+let prisma = new PrismaClient();
+export function getPrismaClient() {
+  return prisma;
+}
 export const _settingsValidator = type({
   basePath: "string",
   civitaiToken: "string",
@@ -53,7 +58,7 @@ function instantiateKy() {
 
 let kyWithProxy: KyInstance = instantiateKy();
 
-console.log(`this is http proxy address: ` + getSettings().httpProxy)
+console.log(`this is http proxy address: ` + getSettings().httpProxy);
 
 export function getKy() {
   return kyWithProxy;
@@ -66,6 +71,18 @@ export function setSettings(newSettings: Partial<Settings>) {
   }
 }
 
-if (process.env.basePath && settings.get('basePath') !== process.env.basePath) {settings.set('basePath', process.env.basePath)}
-if (process.env.civitaiToken && settings.get('civitaiToken') !== process.env.civitaiToken) {settings.set('civitaiToken', process.env.civitaiToken)}
-if (process.env.httpProxy && settings.get('httpProxy') !== process.env.httpProxy) {settings.set('httpProxy', process.env.httpProxy)}
+if (process.env.basePath && settings.get("basePath") !== process.env.basePath) {
+  settings.set("basePath", process.env.basePath);
+}
+if (
+  process.env.civitaiToken &&
+  settings.get("civitaiToken") !== process.env.civitaiToken
+) {
+  settings.set("civitaiToken", process.env.civitaiToken);
+}
+if (
+  process.env.httpProxy &&
+  settings.get("httpProxy") !== process.env.httpProxy
+) {
+  settings.set("httpProxy", process.env.httpProxy);
+}

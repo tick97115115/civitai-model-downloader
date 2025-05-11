@@ -28,8 +28,24 @@ describe("prisma CRUD", () => {
       create: {
         id: modelId1.id,
         name: modelId1.name,
-        creator: modelId1.creator?.username,
-        type: modelId1.type,
+        creator: modelId1.creator?.username
+          ? {
+              connectOrCreate: {
+                where: { username: modelId1.creator?.username },
+                create: {
+                  username: modelId1.creator?.username,
+                  link: modelId1.creator?.link ?? undefined,
+                  image: modelId1.creator?.image ?? undefined,
+                },
+              },
+            }
+          : undefined,
+        type: {
+          connectOrCreate: {
+            where: { name: modelId1.type as string },
+            create: { name: modelId1.type },
+          },
+        },
         nsfwLevel: modelId1.nsfwLevel,
         nsfw: modelId1.nsfw,
         tags: {
@@ -42,25 +58,66 @@ describe("prisma CRUD", () => {
     });
     for (let index = 0; index < modelId1.modelVersions.length; index++) {
       const modelVersion = modelId1.modelVersions[index];
-      await prisma.modelVersion.upsert({
+      const baseModelResult = await prisma.baseModel.upsert({
+        where: { name: modelVersion.baseModel },
+        create: { name: modelVersion.baseModel },
+        update: {},
+      });
+      // create baseModelType record
+      const baseModelTypeResult = modelVersion.baseModelType
+        ? await prisma.baseModelType.upsert({
+            where: { name: modelVersion.baseModelType },
+            create: {
+              name: modelVersion.baseModelType,
+              baseModelId: baseModelResult.id,
+            },
+            update: {},
+          })
+        : undefined;
+
+      const modelVersionResult = await prisma.modelVersion.upsert({
         where: {
           id: modelVersion.id,
         },
         update: {
           name: modelVersion.name,
-          baseModel: modelVersion.baseModel,
-          baseModelType: modelVersion.baseModelType,
+          baseModel: {
+            connectOrCreate: {
+              where: {
+                name: modelVersion.baseModel,
+              },
+              create: {
+                name: modelVersion.baseModel,
+              },
+            },
+          },
+          baseModelType: modelVersion.baseModelType
+            ? {
+                connectOrCreate: {
+                  where: { name: modelVersion.baseModelType },
+                  create: {
+                    name: modelVersion.baseModelType,
+                    baseModel: {
+                      connectOrCreate: {
+                        where: { name: modelVersion.baseModel },
+                        create: { name: modelVersion.baseModel },
+                      },
+                    },
+                  },
+                },
+              }
+            : undefined,
           publishedAt: modelVersion.publishedAt,
           nsfwLevel: modelVersion.nsfwLevel,
         },
         create: {
           id: modelVersion.id,
-          modelId: modelId1.id,
           name: modelVersion.name,
-          baseModel: modelVersion.baseModel,
-          baseModelType: modelVersion.baseModelType,
           publishedAt: modelVersion.publishedAt,
           nsfwLevel: modelVersion.nsfwLevel,
+          modelId: modelId1.id,
+          baseModelId: baseModelResult.id,
+          baseModelTypeId: baseModelTypeResult?.id,
         },
       });
     }

@@ -11,11 +11,31 @@ generator client {
   output   = "./src/prisma/generated"
 }
 
+model Creator {
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  link     String?
+  image    String?
+
+  models Model[]
+
+  @@index([username])
+}
+
+model ModelType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  models Model[]
+
+  @@index([name])
+}
+
 model Model {
   id            Int            @id
   name          String
-  creator       String?
-  type          String
+  creatorId     Int?
+  typeId        Int
   nsfw          Boolean
   nsfwLevel     Int
   modelVersions ModelVersion[]
@@ -23,7 +43,10 @@ model Model {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  @@index([name, type, creator, nsfw, nsfwLevel])
+  creator Creator?  @relation(fields: [creatorId], references: [id])
+  type    ModelType @relation(fields: [typeId], references: [id])
+
+  @@index([name, typeId, creatorId, nsfw, nsfwLevel])
 }
 
 model Tag {
@@ -34,18 +57,41 @@ model Tag {
   @@index([name])
 }
 
+model BaseModel {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  modelVersions  ModelVersion[]
+  baseModelTypes BaseModelType[]
+
+  @@index([name])
+}
+
+model BaseModelType {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  baseModelId Int
+
+  modelVersions ModelVersion[]
+  baseModel     BaseModel      @relation(fields: [baseModelId], references: [id])
+
+  @@index([name, baseModelId])
+}
+
 model ModelVersion {
-  id            Int       @id
-  modelId       Int
-  name          String
-  baseModel     String
-  baseModelType String?
-  publishedAt   DateTime?
-  nsfwLevel     Int
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              Int       @id
+  modelId         Int
+  name            String
+  baseModelId     Int
+  baseModelTypeId Int?
+  publishedAt     DateTime?
+  nsfwLevel       Int
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  model Model @relation(fields: [modelId], references: [id])
+  model         Model          @relation(fields: [modelId], references: [id])
+  baseModel     BaseModel      @relation(fields: [baseModelId], references: [id])
+  baseModelType BaseModelType? @relation(fields: [baseModelTypeId], references: [id])
 
-  @@index([modelId, name, baseModel, baseModelType, publishedAt, nsfwLevel])
+  @@index([modelId, name, baseModelId, baseModelTypeId, publishedAt, nsfwLevel])
 }
