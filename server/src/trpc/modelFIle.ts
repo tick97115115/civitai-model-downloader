@@ -5,6 +5,12 @@ import fileUrl from "file-url";
 import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
 import { getSettings, getKy } from "@server/settings";
+import { stdRes } from "@shared/types/trpcResponse";
+
+const getFileResourceUrlRes = stdRes.and({
+  downloadUrl: "string.url",
+});
+type GetFileResourceUrlRes = typeof getFileResourceUrlRes.infer;
 
 export const modelFileRouter = router({
   getFilePath: publicProcedure
@@ -35,14 +41,36 @@ export const modelFileRouter = router({
       })
     )
     .query(async (params) => {
-      const res = await getKy().get(params.input.url, {
-        timeout: 60000,
-      });
-      if (!res.ok) {
-        throw new Error(`Fetch error: ${res.statusText}`);
+      try {
+        const res = await getKy().get(params.input.url, {
+          timeout: 60000,
+        });
+        if (!res.ok) {
+          throw new Error(`Fetch error: ${res.statusText}`);
+        }
+        const data: GetFileResourceUrlRes = {
+          code: 200,
+          message: "success",
+          downloadUrl: res.url,
+        };
+        return data;
+      } catch (error) {
+        // @ts-ignore
+        if (error.name === "TimeoutError") {
+          const data: GetFileResourceUrlRes = {
+            code: 408,
+            message: "timeout",
+            downloadUrl: "",
+          };
+          return data;
+        } else {
+          const data: GetFileResourceUrlRes = {
+            code: 500,
+            message: "unknown error",
+            downloadUrl: "",
+          };
+          return data;
+        }
       }
-      return {
-        downloadUrl: res.url,
-      };
     }),
 });

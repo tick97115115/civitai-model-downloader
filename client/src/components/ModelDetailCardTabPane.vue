@@ -15,7 +15,8 @@ const { gopeedClient, modelId, CivtAI_Token } = defineProps<{
 
 async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
   // download files
-  modelVersion.files.map(async (file, index) => {
+  for (let index = 0; index < modelVersion.files.length; index++) {
+    const file = modelVersion.files[index];
     const info = await trpcClient.modelFile.getFilePath.mutate({
       modelId: modelId,
       versionId: modelVersion.id,
@@ -28,13 +29,20 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
       const res = await trpcClient.modelFile.getFileResourceUrl.query({
         url: url,
       });
+      if (res.code === 408) {
+        ElMessage({
+          message: res.message,
+          type: "error",
+        });
+        continue;
+      }
       console.log(`This is the resolved uri: ${res.downloadUrl}`);
       await gopeedClient.createTask({
         req: { url: res.downloadUrl },
         opt: { name: info.fileName, path: info.fileDirPath },
       });
     }
-  });
+  }
   modelVersion.images.map(async (image, index) => {
     const info = await trpcClient.media.getImagePath.mutate({
       modelId: modelId,

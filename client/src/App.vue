@@ -3,6 +3,7 @@ import type { ModelId } from "@shared/types/models_endpoint";
 import {
   models_response,
   models_request_opts,
+  MODELS_ENDPOINT,
 } from "@shared/types/models_endpoint";
 import { type } from "arktype";
 import { ElMessage } from "element-plus";
@@ -16,9 +17,6 @@ import DownloadsView from "@/views/DownloadsView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 
 const loading = ref(false);
-
-const MODELS_ENDPOINT = "https://civitai.com/api/v1/models";
-
 const model_ids = ref<Array<ModelId>>([]);
 const next_page = ref<null | string>(null);
 
