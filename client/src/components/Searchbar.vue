@@ -35,7 +35,7 @@ function focusOnSearch() {
           placeholder="Please input"
           v-model="search_params.query"
           class="input-with-select searchbar"
-          @focus=""
+          @keyup.enter="search"
         >
           <!-- <template #prepend>
           <el-select v-model="select" placeholder="Select" style="width: 115px">
@@ -45,7 +45,7 @@ function focusOnSearch() {
           </el-select>
         </template> -->
           <template #append>
-            <el-button @click="search()">
+            <el-button @click="search">
               <template #icon>
                 <el-icon><Search /></el-icon> </template
             ></el-button>
@@ -76,12 +76,6 @@ function focusOnSearch() {
           v-model="search_params.username"
           placeholder="Username"
         >
-          <template #append>
-            <el-button @click="search()">
-              <template #icon>
-                <el-icon><Search /></el-icon> </template
-            ></el-button>
-          </template>
         </el-input>
         <div>
           <el-checkbox label="NSFW" v-model="search_params.nsfw"></el-checkbox>

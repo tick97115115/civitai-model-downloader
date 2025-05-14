@@ -1,6 +1,7 @@
 import { router, publicProcedure } from "./trpc";
 import { type } from "arktype";
-import { _settingsValidator, setSettings, getSettings } from "@server/settings";
+import { setSettings, getSettings } from "@server/settings";
+import { _settingsValidator } from "@shared/types/settings";
 
 export const settingsRouter = router({
   getSettings: publicProcedure

@@ -2,10 +2,11 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "node:url";
 import baseConfig from "../vite.config.base";
+import vueDevTools from "vite-plugin-vue-devtools";
 
 export default defineConfig({
   ...baseConfig,
-  plugins: [vue()],
+  plugins: [vue(), vueDevTools()],
   root: fileURLToPath(new URL(".", import.meta.url)),
   resolve: {
     alias: {

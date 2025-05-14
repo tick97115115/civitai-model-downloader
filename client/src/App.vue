@@ -15,24 +15,31 @@ import Searchbar from "./components/Searchbar.vue";
 import ModelCard from "@/components/ModelCard.vue";
 import DownloadsView from "@/views/DownloadsView.vue";
 import SettingsView from "@/views/SettingsView.vue";
+import { useSettingsStore } from "@/stores/settings";
+import { storeToRefs } from "pinia";
+
+const settingsStore = useSettingsStore();
+const { settings } = storeToRefs(settingsStore);
 
 const loading = ref(false);
 const model_ids = ref<Array<ModelId>>([]);
 const next_page = ref<null | string>(null);
 
-const out = models_request_opts({
-  token: "d250ad5b931cd1ab4895b66ae2d42149",
-  nsfw: true,
-});
+const out = models_request_opts({});
 if (out instanceof type.errors) {
   throw new Error("search params invalid!");
 }
 const search_params = reactive(out);
 const infiniteScrollDisabled = ref(true);
 async function search() {
+  // loading
   loading.value = true;
+
+  // scroll back to top position
   const gallery_ele = document.querySelector("#gallery") as HTMLElement;
   gallery_ele.scrollTop = 0;
+
+  // constructing query params
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(search_params)) {
     if (Array.isArray(value)) {
@@ -41,12 +48,19 @@ async function search() {
       params.append(key, String(value));
     }
   }
+
+  // send request
   try {
     const res = await ky.get(MODELS_ENDPOINT, {
       searchParams: params,
       mode: "cors",
       timeout: 40000,
-      // retry: {}
+      headers:
+        settings.value.civitaiToken !== ""
+          ? {
+              Authorization: `Bearer ${settings.value.civitaiToken}`,
+            }
+          : undefined,
     });
 
     if (!res.ok) {

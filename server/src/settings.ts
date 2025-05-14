@@ -4,17 +4,7 @@ import ky, { KyInstance } from "ky";
 import { EnvHttpProxyAgent } from "undici";
 import { PrismaClient } from "@server/prisma/generated";
 import "dotenv/config";
-
-let prisma = new PrismaClient();
-export function getPrismaClient() {
-  return prisma;
-}
-export const _settingsValidator = type({
-  basePath: "string",
-  civitaiToken: "string",
-  httpProxy: "string",
-});
-export type Settings = typeof _settingsValidator.infer;
+import { _settingsValidator } from "@shared/types/settings";
 
 export const settings = new Conf({
   projectName: "civitai-model-downloader",
@@ -42,6 +32,15 @@ export function getSettings() {
   return currentSettings;
 }
 
+export function setSettings(newSettings: Partial<Settings>) {
+  settings.set({ ...currentSettings, ...newSettings });
+  if (newSettings.httpProxy !== currentSettings.httpProxy) {
+    kyWithProxy = instantiateKy();
+  }
+}
+// Settings - End
+
+// Ky client - Start
 function instantiateKy() {
   if (getSettings().httpProxy === "") {
     return ky;
@@ -63,14 +62,16 @@ console.log(`this is http proxy address: ` + getSettings().httpProxy);
 export function getKy() {
   return kyWithProxy;
 }
+// Ky client - End
 
-export function setSettings(newSettings: Partial<Settings>) {
-  settings.set({ ...currentSettings, ...newSettings });
-  if (newSettings.httpProxy !== currentSettings.httpProxy) {
-    kyWithProxy = instantiateKy();
-  }
+// Prisma client - Start
+let prisma = new PrismaClient();
+export function getPrismaClient() {
+  return prisma;
 }
+// Prisma client - End
 
+// for dev use, check dotenv value
 if (process.env.basePath && settings.get("basePath") !== process.env.basePath) {
   settings.set("basePath", process.env.basePath);
 }
