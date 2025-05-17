@@ -5,8 +5,11 @@ import { _settingsValidator } from "@shared/types/settings";
 
 export const settingsRouter = router({
   getSettings: publicProcedure
-    .input(type("undefined"))
+    .input(type({ "refresh?": "boolean" }))
     .query(async (params) => {
+      if (params.input.refresh) {
+        return getSettings(params.input.refresh);
+      }
       return getSettings();
     }),
   setSettings: publicProcedure

@@ -1,10 +1,10 @@
 import Conf from "conf";
-import { type } from "arktype";
 import ky, { KyInstance } from "ky";
 import { EnvHttpProxyAgent } from "undici";
 import { PrismaClient } from "@server/prisma/generated";
 import "dotenv/config";
 import { _settingsValidator } from "@shared/types/settings";
+import type { Settings } from "@shared/types/settings";
 
 export const settings = new Conf({
   projectName: "civitai-model-downloader",
@@ -28,7 +28,10 @@ export const settings = new Conf({
 
 let currentSettings = _settingsValidator(settings.store) as Settings;
 
-export function getSettings() {
+export function getSettings(refresh: boolean = false) {
+  if (refresh) {
+    currentSettings = _settingsValidator(settings.store) as Settings;
+  }
   return currentSettings;
 }
 
