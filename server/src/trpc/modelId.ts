@@ -2,7 +2,7 @@ import { router, publicProcedure } from "./trpc";
 import { type } from "arktype";
 import { pathExists } from "path-exists";
 import fileUrl from "file-url";
-import { model_id } from "@shared/types/models_endpoint";
+import { model_id, models_request_opts } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
 import { getSettings } from "@server/settings";
 import { writeJsonFile } from "write-json-file";
@@ -80,4 +80,7 @@ export const modelIdRouter = router({
       }
       return result;
     }),
+  findLocalModels: publicProcedure
+    .input(models_request_opts)
+    .mutation(async (params) => {}),
 });

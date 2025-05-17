@@ -1,32 +1,10 @@
-import { model_types, baseModels } from "../baseModels/misc";
+import { base_models, BaseModelsArray } from "../baseModels/misc";
 import { type } from "arktype";
 import { describe, test, expect } from "vitest";
 import * as _ from "lodash-es";
 
-test("convert model_types to array", () => {
-  const modelTypesArray = _.map(model_types.json, (v, k) => v["unit"]);
-  expect(modelTypesArray).toContainEqual([
-    "AestheticGradient",
-    "Checkpoint",
-    "Controlnet",
-    "Detection",
-    "DoRA",
-    "TextualInversion",
-    "Hypernetwork",
-    "LORA",
-    "Poses",
-    "LoCon",
-    "Other",
-    "MotionModule",
-    "Upscaler",
-    "VAE",
-    "Wildcards",
-    "Workflows",
-  ]);
-});
-
 test("test enumerated type in runtime", () => {
-  const out = baseModels("Illustrious");
+  const out = base_models("Illustrious");
 
   let result = ``;
 
@@ -37,4 +15,11 @@ test("test enumerated type in runtime", () => {
   }
 
   expect(result).eq("string");
+});
+
+test("test baseModelsArray is a Array<string> type", () => {
+  const ref = BaseModelsArray;
+
+  expect(BaseModelsArray.length > 10).eq(true);
+  expect(BaseModelsArray[0]).toBeTypeOf("string");
 });

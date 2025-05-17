@@ -7,18 +7,15 @@ import {
   model_types,
   models_request_sort,
   models_request_period,
+  ModelTypesArray,
+  ModelsRequestPeriodArray,
+  ModelsRequestSortArray,
 } from "@shared/types/baseModels/misc";
 
 defineProps<{
   search(): Promise<void>;
   search_params: ModelsRequestOpts;
 }>();
-
-type arkUnites = Array<arkUnit>;
-
-type arkUnit = {
-  unit: string;
-};
 
 const searchBarFocused = ref(false);
 
@@ -62,12 +59,12 @@ function focusOnSearch() {
           placeholder="content types"
         >
           <el-option
-            v-for="item in model_types.json as arkUnites"
-            :key="item['unit']"
-            :label="item['unit']"
-            :value="item['unit']"
+            v-for="item in ModelTypesArray"
+            :key="item"
+            :label="item"
+            :value="item"
           >
-            {{ item["unit"] }}
+            {{ item }}
             ></el-option
           >
         </el-select>
@@ -94,11 +91,11 @@ function focusOnSearch() {
           :teleported="false"
         >
           <el-option
-            v-for="item in models_request_period.json as arkUnites"
-            :key="item['unit']"
-            :label="item['unit']"
-            :value="item['unit']"
-            >{{ item["unit"] }}</el-option
+            v-for="item in ModelsRequestPeriodArray"
+            :key="item"
+            :label="item"
+            :value="item"
+            >{{ item }}</el-option
           > </el-select
         ><el-select
           placeholder="Sort"
@@ -106,11 +103,11 @@ function focusOnSearch() {
           :teleported="false"
         >
           <el-option
-            v-for="item in models_request_sort.json as arkUnites"
-            :key="item['unit']"
-            :label="item['unit']"
-            :value="item['unit']"
-            >{{ item["unit"] }}</el-option
+            v-for="item in ModelsRequestSortArray"
+            :key="item"
+            :label="item"
+            :value="item"
+            >{{ item }}</el-option
           >
         </el-select>
         <el-input

@@ -1,34 +1,73 @@
 import { type } from "arktype";
+import _ from "lodash";
 
 // https://www.jsondiff.com/ 找到共有属性名
 
-export const model_types = type(
-  "'Checkpoint' | 'TextualInversion' | 'Hypernetwork' | 'AestheticGradient' | 'LORA' | 'Controlnet' | 'Poses' | 'LoCon' | 'DoRA' | 'Other' | 'MotionModule' | 'Upscaler' | 'VAE' | 'Wildcards' | 'Workflows' | 'Detection'"
+type arkUnit = {
+  unit: string;
+};
+type arkUnites = Array<arkUnit>;
+
+export const model_types = type.enumerated(
+  "Checkpoint",
+  "TextualInversion",
+  "Hypernetwork",
+  "AestheticGradient",
+  "LORA",
+  "Controlnet",
+  "Poses",
+  "LoCon",
+  "DoRA",
+  "Other",
+  "MotionModule",
+  "Upscaler",
+  "VAE",
+  "Wildcards",
+  "Workflows",
+  "Detection"
 );
 export type ModelTypes = typeof model_types.infer;
+export const ModelTypesArray = (() => {
+  const modelTypeUnits = model_types.json as arkUnites;
+  return _.map(modelTypeUnits, function (u) {
+    return u.unit;
+  });
+})();
 
 export const models_request_period = type(
   "'AllTime' | 'Day' | 'Week' | 'Month' | 'Year'"
 );
 export type ModelsRequestPeriod = typeof models_request_period.infer;
+export const ModelsRequestPeriodArray = (() => {
+  const modelsRequestPeriodUnits = models_request_period.json as arkUnites;
+  return _.map(modelsRequestPeriodUnits, function (u) {
+    return u.unit;
+  });
+})();
 
-export const allowCommercialUse = type(
+export const allow_commercial_use = type(
   "'Image' | 'RentCivit' | 'Rent' | 'Sell' | 'None'"
 );
-export type AllowCommercialUse = typeof allowCommercialUse.infer;
+export type AllowCommercialUse = typeof allow_commercial_use.infer;
 
 export const models_request_sort = type(
   "'Highest Rated' | 'Most Downloaded' | 'Newest'"
 );
 export type ModelsRequestSort = typeof models_request_sort.infer;
+export const ModelsRequestSortArray = (() => {
+  const ModelsRequestSortUnits = models_request_sort.json as arkUnites;
+  return _.map(ModelsRequestSortUnits, function (u) {
+    return u.unit;
+  });
+})();
 
-export const nsfwLevel = type("'None' | 'Soft' | 'Mature' | 'X' | 'Blocked'");
-export type NsfwLevel = typeof nsfwLevel.infer;
+export const nsfw_level = type("'None' | 'Soft' | 'Mature' | 'X' | 'Blocked'");
+export type NsfwLevel = typeof nsfw_level.infer;
 
-export const checkpointType = type("'Merge' | 'Trained'");
-export type CheckpointType = typeof checkpointType.infer;
+export const checkpoint_type = type("'Merge' | 'Trained'");
+export type CheckpointType = typeof checkpoint_type.infer;
 
-export const baseModels = type.enumerated(
+export const base_models = type.enumerated(
   "Aura Flow",
   "CogVideoX",
   "Flux .1 D",
@@ -76,4 +115,10 @@ export const baseModels = type.enumerated(
   "Stable Cascade",
   "WAN Video"
 );
-export type BaseModels = typeof baseModels.infer;
+export type BaseModels = typeof base_models.infer;
+export const BaseModelsArray = (() => {
+  const baseModelUnits = base_models.json as arkUnites;
+  return _.map(baseModelUnits, function (u) {
+    return u.unit;
+  });
+})();

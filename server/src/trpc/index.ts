@@ -1,6 +1,6 @@
 import { router } from "./trpc";
 import { mediaRouter } from "./media";
-import { modelFileRouter } from "./modelFile";
+import { modelFileRouter } from "./modelFIle";
 import { modelIdRouter } from "./modelId";
 import { modelVersionRouter } from "./modelVersion";
 import { settingsRouter } from "./settings";

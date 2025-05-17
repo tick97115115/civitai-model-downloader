@@ -1,10 +1,10 @@
 import {
   model_types,
-  allowCommercialUse,
+  allow_commercial_use,
   models_request_sort,
   models_request_period,
-  baseModels,
-  checkpointType,
+  base_models,
+  checkpoint_type,
 } from "./baseModels/misc";
 import { type } from "arktype";
 
@@ -120,7 +120,7 @@ export const models_request_opts = type({
   "limit?": "number.integer", // The number of results to be returned per page. This can be a number between 1 and 100. By default, each page will return 100 results
   "page?": "number.integer", // The page from which to start fetching models
   "query?": "string", // Search query to filter models by name
-  "tag?": "string", // Search query to filter models by tag
+  "tag?": "string[]", // Search query to filter models by tag
   "username?": "string", // Search query to filter models by user
   "types?": model_types.array(), // The type of model you want to filter with. If none is specified, it will return all types
   "sort?": models_request_sort, // The order in which you wish to sort the results
@@ -132,11 +132,11 @@ export const models_request_opts = type({
   "allowNoCredit?": "boolean", // Filter to models that require or don't require crediting the creator
   "allowDerivatives?": "boolean", // Filter to models that allow or don't allow creating derivatives
   "allowDifferentLicenses?": "boolean", // Filter to models that allow or don't allow derivatives to have a different license
-  "allowCommercialUse?": allowCommercialUse.array(), // Filter to models based on their commercial permissions
+  "allowCommercialUse?": allow_commercial_use.array(), // Filter to models based on their commercial permissions
   "nsfw?": "boolean", // If false, will return safer images and hide models that don't have safe images
   "supportsGeneration?": "boolean", // If true, will return models that support generation
-  "checkpointType?": checkpointType,
-  "baseModels?": baseModels,
+  "checkpointType?": checkpoint_type,
+  "baseModels?": base_models.array(),
   "token?": "string", // required for search models
 });
 export type ModelsRequestOpts = typeof models_request_opts.infer;
