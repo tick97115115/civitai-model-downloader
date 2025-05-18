@@ -38,6 +38,7 @@ model Model {
   typeId        Int
   nsfw          Boolean
   nsfwLevel     Int
+  apiInfo       Json
   modelVersions ModelVersion[]
   tags          Tag[]
   createdAt     DateTime       @default(now())
@@ -85,6 +86,7 @@ model ModelVersion {
   baseModelId     Int
   baseModelTypeId Int?
   publishedAt     DateTime?
+  apiInfo         Json
   nsfwLevel       Int
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

@@ -7,7 +7,8 @@ import type {
   ModelVersionFile,
   ModelVersionImage,
 } from "@shared/types/models_endpoint";
-
+import { ModelTypes } from "@shared/types/baseModels/misc";
+import { findModelVersion } from "@shared/types/utils";
 /**
  * The layout of directory:
  * {baseDir} / {modelType} / {modelId} / {modelId}.api-info.json
@@ -48,6 +49,57 @@ function extractFilenameFromUrl(url: string): string {
   return filename;
 }
 
+export function getModelIdPath(
+  basePath: string,
+  modelType: ModelTypes,
+  modelId: number
+) {
+  return join(normalize(basePath), modelType, modelId.toString());
+}
+
+export function getImageDir(basePath: string) {
+  return join(basePath, "media");
+}
+
+export function getApiInfoJsonFileName(id: number): string {
+  return `${id}.api-info.json`;
+}
+
+export function getModelIdApiInfoJsonPath(
+  basePath: string,
+  modelType: ModelTypes,
+  modelId: number
+): string {
+  return join(
+    getModelIdPath(basePath, modelType, modelId),
+    getApiInfoJsonFileName(modelId)
+  );
+}
+
+export function getModelVersionPath(
+  basePath: string,
+  modelType: ModelTypes,
+  modelId: number,
+  versionId: number
+) {
+  return join(
+    getModelIdPath(basePath, modelType, modelId),
+    versionId.toString()
+  );
+}
+
+export function getModelVersionApiInfoJsonPath(
+  basePath: string,
+  modelType: ModelTypes,
+  modelId: number,
+  modelVersionId: number
+) {
+  return join(
+    getModelVersionPath(basePath, modelType, modelId, modelVersionId),
+    getApiInfoJsonFileName(modelVersionId)
+  );
+}
+
 // // Test cases
 // try {
 //     console.log(extractFilenameFromUrl('https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/df372d95-4f9b-4363-a86c-82a11d166f40/width=450/6039981.jpeg'));
@@ -78,7 +130,7 @@ export class ModelVersionLayout {
   }
 
   getApiInfoJsonFileName(): string {
-    return `${this.modelVersion.id}.api-info.json`;
+    return getApiInfoJsonFileName(this.modelVersion.id);
   }
 
   getApiInfoJsonPath(): string {
@@ -140,23 +192,17 @@ export class ModelIdLayout {
   imgDir: string;
   modelIdPath: string;
   constructor(public basePath: string, public modelId: ModelId) {
-    this.modelIdPath = join(
-      normalize(basePath),
+    this.modelIdPath = getModelIdPath(
+      basePath,
       this.modelId.type,
-      this.modelId.id.toString()
+      this.modelId.id
     );
-    this.imgDir = join(basePath, "media");
+    this.imgDir = getImageDir(basePath);
     this.modelId = modelId;
   }
 
   findModelVersion(modelVersionId: number): ModelVersion {
-    const modelVersion = _.find(this.modelId.modelVersions, function (mv) {
-      return mv.id === modelVersionId;
-    });
-    if (modelVersion === undefined) {
-      throw new Error(`model have no version id: ${modelVersionId}`);
-    }
-    return modelVersion;
+    return findModelVersion(this.modelId, modelVersionId);
   }
 
   getApiInfoJsonFileDir(): string {
@@ -164,16 +210,26 @@ export class ModelIdLayout {
   }
 
   getApiInfoJsonFileName(): string {
-    return `${this.modelId.id}.api-info.json`;
+    return getApiInfoJsonFileName(this.modelId.id);
   }
 
   getApiInfoJsonPath(): string {
-    return join(this.getApiInfoJsonFileDir(), this.getApiInfoJsonFileName());
+    return getModelIdApiInfoJsonPath(
+      this.basePath,
+      this.modelId.type,
+      this.modelId.id
+    );
   }
 
   getModelVersionLayout(versionId: number) {
     return new ModelVersionLayout(
-      join(this.modelIdPath, versionId.toString()),
+      // join(this.modelIdPath, versionId.toString()),
+      getModelVersionPath(
+        this.basePath,
+        this.modelId.type,
+        this.modelId.id,
+        versionId
+      ),
       this.findModelVersion(versionId),
       this.imgDir
     );

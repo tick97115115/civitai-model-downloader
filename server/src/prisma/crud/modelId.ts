@@ -1,7 +1,11 @@
-import { getPrismaClient } from "@server/settings";
+import { getPrismaClient, getSettings } from "@server/settings";
 import type { ModelId, ModelsRequestOpts } from "@shared/types/models_endpoint";
 import { upsertOneCreator } from "./creator";
 import { upsertOneModelType } from "./modelType";
+import { deleteOneModelVersion } from "./modelVersion";
+import { checkIfModelVersionOnDisk } from "@server/utils";
+import { getModelVersionPath } from "@server/fileStoreLayout";
+import { ModelTypes } from "@shared/types/baseModels/misc";
 
 export async function upsertOneModelId(modelId: ModelId) {
   const creatorRecord = modelId.creator
@@ -37,7 +41,7 @@ const defaultQuerySettings: ModelsRequestOpts = {
   limit: 20,
 };
 
-export async function find(params: ModelsRequestOpts) {
+export async function findManyModels(params: ModelsRequestOpts) {
   const records = await getPrismaClient().model.findMany({
     where: {
       name: {
@@ -76,6 +80,5 @@ export async function find(params: ModelsRequestOpts) {
       type: true,
     },
   });
-  // return an array of modelId objects with only modelVersions these on disk
-  // need invoke some procedure on server side.
+  return records;
 }
