@@ -1,6 +1,6 @@
 import { getPrismaClient } from "@server/settings";
 
-export async function upsertOneModelType(modelTypeString: string) {
+export async function findOrCreateOneModelType(modelTypeString: string) {
   const record = await getPrismaClient().modelType.upsert({
     where: {
       name: modelTypeString,

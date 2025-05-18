@@ -1,6 +1,6 @@
 import { getPrismaClient } from "@server/settings";
 
-export async function upsertOneBaseModel(baseModelString: string) {
+export async function findOrCreateOneBaseModel(baseModelString: string) {
   const record = await getPrismaClient().baseModel.upsert({
     where: {
       name: baseModelString,

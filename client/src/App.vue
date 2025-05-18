@@ -17,6 +17,8 @@ import DownloadsView from "@/views/DownloadsView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 import { useSettingsStore } from "@/stores/settings";
 import { storeToRefs } from "pinia";
+import { trpcClient } from "./utils/trpcClient";
+import DbRefreshButton from "./components/DbRefreshButton.vue";
 
 const settingsStore = useSettingsStore();
 const { settings } = storeToRefs(settingsStore);
@@ -39,63 +41,30 @@ async function search() {
   const gallery_ele = document.querySelector("#gallery") as HTMLElement;
   gallery_ele.scrollTop = 0;
 
-  // constructing query params
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(search_params)) {
-    if (Array.isArray(value)) {
-      value.forEach((v) => params.append(key, String(v)));
-    } else {
-      params.append(key, String(value));
-    }
-  }
-
   // send request
-  try {
-    const res = await ky.get(MODELS_ENDPOINT, {
-      searchParams: params,
-      mode: "cors",
-      timeout: 40000,
-      headers:
-        settings.value.civitaiToken !== ""
-          ? {
-              Authorization: `Bearer ${settings.value.civitaiToken}`,
-            }
-          : undefined,
+  const res = await trpcClient.civitaiApi.models.mutate(search_params);
+
+  if (res.code === 200) {
+    ElMessage({
+      message: res.message,
+      type: "success",
     });
+    const data = res.data!;
 
-    if (!res.ok) {
-      ElMessage({
-        message: res.statusText,
-        type: "warning",
-      });
-      loading.value = false;
-      return;
-    }
-    const json = await res.json();
-    const data = models_response(json);
+    model_ids.value = data.items;
+    next_page.value = data.metadata.nextPage ?? null;
+    console.log(next_page.value);
 
-    if (data instanceof type.errors) {
-      // hover out.summary to see validation errors
-      ElMessage({
-        message: data.summary,
-        type: "warning",
-      });
-      loading.value = false;
-    } else {
-      model_ids.value = data.items;
-      next_page.value = data.metadata.nextPage ?? null;
-      console.log(next_page.value);
-    }
     loading.value = false;
     infiniteScrollDisabled.value = false;
-  } catch (error) {
+    return;
+  } else {
+    // hover out.summary to see validation errors
     ElMessage({
-      message: String(error),
+      message: res.message,
       type: "warning",
     });
-
     loading.value = false;
-    throw error;
   }
 }
 
@@ -108,33 +77,26 @@ async function load() {
     console.log("No more data can be loaded.");
     return;
   }
-  const res = await ky.get(next_page.value);
-  if (!res.ok) {
-    ElMessage({
-      message: res.statusText,
-      type: "warning",
-    });
-    loading.value = false;
-    return;
-  }
-  const json = await res.json();
-  const data = models_response(json);
-  if (data instanceof type.errors) {
-    // hover out.summary to see validation errors
-    ElMessage({
-      message: data.summary,
-      type: "warning",
-    });
-    loading.value = false;
-    return;
-  }
-  if (data.items[0].id === model_ids.value[model_ids.value.length - 1].id) {
-    data.items.shift();
-  }
 
-  model_ids.value.push(...data.items);
-  next_page.value = data.metadata.nextPage ?? null;
-  loading.value = false;
+  const res = await trpcClient.civitaiApi.modelsLoadMore.query({
+    next: next_page.value,
+  });
+  if (res.code === 200) {
+    const data = res.data!;
+    if (data.items[0].id === model_ids.value[model_ids.value.length - 1].id) {
+      data.items.shift();
+    }
+    model_ids.value.push(...data.items);
+    next_page.value = data.metadata.nextPage ?? null;
+    loading.value = false;
+  } else {
+    ElMessage({
+      message: res.message,
+      type: "warning",
+    });
+    loading.value = false;
+    return;
+  }
 }
 </script>
 
@@ -169,6 +131,8 @@ async function load() {
 
     <el-footer class="footer">
       <ModelDetailCard></ModelDetailCard>
+
+      <DbRefreshButton></DbRefreshButton>
       <DownloadsView></DownloadsView>
       <Searchbar :search="search" :search_params="search_params"></Searchbar>
       <SettingsView></SettingsView>

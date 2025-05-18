@@ -2,13 +2,20 @@ import { router, publicProcedure } from "./trpc";
 import { type } from "arktype";
 import { pathExists } from "path-exists";
 import fileUrl from "file-url";
-import { model_id, models_request_opts } from "@shared/types/models_endpoint";
+import {
+  model_id,
+  models_request_opts,
+  ModelsResponse,
+} from "@shared/types/models_endpoint";
 import type { ModelTypes } from "@shared/types/baseModels/misc";
 import { getModelVersionPath, ModelIdLayout } from "../fileStoreLayout";
 import { getSettings } from "@server/settings";
 import { writeJsonFile } from "write-json-file";
 import { checkIfModelVersionOnDisk, hasSafetensorsFile } from "@server/utils";
-import { findManyModels } from "@server/prisma/crud/modelId";
+import {
+  defaultQuerySettings,
+  findManyModels,
+} from "@server/prisma/crud/modelId";
 import { deleteOneModelVersion } from "@server/prisma/crud/modelVersion";
 
 export const modelIdRouter = router({
@@ -91,6 +98,7 @@ export const modelIdRouter = router({
       // check if modelversion in db have corresponding model file on disk, if not remove the record.
       let haveGhostRecord = false;
 
+      // iterates untill no ghost record in result
       do {
         haveGhostRecord = false;
 
@@ -119,7 +127,10 @@ export const modelIdRouter = router({
         }
       } while (haveGhostRecord);
 
-      // iterates untill no ghost record in result
-      return records;
+      // construct a response
+      const modelsResponse: ModelsResponse = {
+        items: [],
+        metadata: {},
+      };
     }),
 });

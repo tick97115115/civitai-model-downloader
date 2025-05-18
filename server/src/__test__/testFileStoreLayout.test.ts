@@ -5,7 +5,10 @@ import sanitize from "sanitize-basename";
 import * as _ from "lodash-es";
 import { models_response } from "@shared/types/models_endpoint";
 import { ModelId, ModelsResponse } from "@shared/types/models_endpoint";
-import { read, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import "dotenv/config";
+import { getSettings } from "@server/settings";
+import fg from "fast-glob";
 
 // @ts-nocheck
 export const models_res = models_response(
@@ -50,4 +53,13 @@ describe("test layout class", () => {
       join(mvlayout.imgDir, `${mimg.id}.${_.last(mimg.url.split("."))}`)
     );
   });
+});
+
+test("how to use fastglob scan model file", async () => {
+  const expression =
+    process.platform === "win32"
+      ? `${fg.convertPathToPattern(getSettings().basePath)}/**/*.safetensors`
+      : `${getSettings().basePath}/**/*.safetensors`;
+  const safetensors = await fg.async(expression);
+  expect(safetensors.length > 0).eq(true);
 });

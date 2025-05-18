@@ -20,3 +20,20 @@ export async function upsertOneCreator(creator: Creator) {
     : undefined;
   return record;
 }
+
+export async function findOrCreateOneCreator(creator: Creator) {
+  const record = creator.username
+    ? await getPrismaClient().creator.upsert({
+        where: {
+          username: creator.username,
+        },
+        update: {},
+        create: {
+          username: creator.username,
+          link: creator.link ? creator.link : undefined,
+          image: creator.image ? creator.image : undefined,
+        },
+      })
+    : undefined;
+  return record;
+}

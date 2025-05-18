@@ -6,6 +6,9 @@ import { model_id } from "@shared/types/models_endpoint";
 import { ModelIdLayout } from "../fileStoreLayout";
 import { getSettings } from "@server/settings";
 import { writeJsonFile } from "write-json-file";
+import { scanModelsAndSyncToDb } from "@server/prisma/crud/modelVersion";
+import { stdRes } from "@shared/types/trpcResponse";
+import type { StdRes } from "@shared/types/trpcResponse";
 
 export const modelVersionRouter = router({
   getModelVersionApiInfoJsonPath: publicProcedure
@@ -46,5 +49,24 @@ export const modelVersionRouter = router({
       );
       const mvlayout = milayout.getModelVersionLayout(params.input.versionId);
       await writeJsonFile(mvlayout.getApiInfoJsonPath(), mvlayout.modelVersion);
+    }),
+  scanModelsAndSyncToDb: publicProcedure
+    .input(type("undefined"))
+    .query(async () => {
+      try {
+        await scanModelsAndSyncToDb();
+      } catch (error) {
+        console.error(error);
+        const result: StdRes = {
+          code: 500,
+          message: `failed`,
+        };
+        return result;
+      }
+      const result: StdRes = {
+        code: 200,
+        message: `success!`,
+      };
+      return result;
     }),
 });

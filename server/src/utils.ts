@@ -1,6 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { pathExists } from "path-exists";
+import { getSettings } from "./settings";
+import fg from "fast-glob";
 
 /**
  * 检查文件夹内是否存在至少一个 .safetensors 文件
@@ -35,4 +37,13 @@ export async function checkIfModelVersionOnDisk(modelVersionPath: string) {
     return true;
   }
   return false;
+}
+
+export async function scanModels() {
+  const expression =
+    process.platform === "win32"
+      ? `${fg.convertPathToPattern(getSettings().basePath)}/**/*.safetensors`
+      : `${getSettings().basePath}/**/*.safetensors`;
+  const safetensors = await fg.async(expression);
+  return safetensors;
 }

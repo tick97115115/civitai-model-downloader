@@ -10,7 +10,7 @@ test("basic test", () => {
   expect(path).toBeTypeOf("string");
 });
 
-describe("prisma CRUD", () => {
+describe("prisma CRUD example", () => {
   test("create", async () => {
     await prisma.model.upsert({
       where: { id: modelId1.id },

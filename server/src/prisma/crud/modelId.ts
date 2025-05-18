@@ -1,17 +1,17 @@
 import { getPrismaClient, getSettings } from "@server/settings";
 import type { ModelId, ModelsRequestOpts } from "@shared/types/models_endpoint";
-import { upsertOneCreator } from "./creator";
-import { upsertOneModelType } from "./modelType";
+import { findOrCreateOneCreator } from "./creator";
+import { findOrCreateOneModelType } from "./modelType";
 import { deleteOneModelVersion } from "./modelVersion";
 import { checkIfModelVersionOnDisk } from "@server/utils";
 import { getModelVersionPath } from "@server/fileStoreLayout";
 import { ModelTypes } from "@shared/types/baseModels/misc";
 
-export async function upsertOneModelId(modelId: ModelId) {
+export async function findOrCreateOneModelId(modelId: ModelId) {
   const creatorRecord = modelId.creator
-    ? await upsertOneCreator(modelId.creator)
+    ? await findOrCreateOneCreator(modelId.creator)
     : undefined;
-  const modelTypeRecord = await upsertOneModelType(modelId.type);
+  const modelTypeRecord = await findOrCreateOneModelType(modelId.type);
 
   const record = await getPrismaClient().model.upsert({
     where: {
@@ -36,7 +36,7 @@ export async function upsertOneModelId(modelId: ModelId) {
   return record;
 }
 
-const defaultQuerySettings: ModelsRequestOpts = {
+export const defaultQuerySettings: ModelsRequestOpts = {
   page: 1,
   limit: 20,
 };

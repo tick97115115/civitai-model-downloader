@@ -1,6 +1,6 @@
 import { getPrismaClient } from "@server/settings";
 
-export async function upsertOneBaseModelType(
+export async function findOrCreateOneBaseModelType(
   baseModelTypeString: string,
   baseModelId: number
 ) {

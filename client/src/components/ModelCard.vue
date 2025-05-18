@@ -36,6 +36,7 @@ const { setModelId, setModelDetailCardDisplay } = modelDetailStore;
       v-if="modelId.modelVersions[0]?.images[0]?.type !== 'image'"
       style="width: 100%"
       autoplay
+      muted
       loop
       :src="modelId.modelVersions[0]?.images[0]?.url ?? null"
     ></video>
