@@ -1,11 +1,8 @@
 import { getPrismaClient, getSettings } from "@server/settings";
-import type { ModelId, ModelsRequestOpts } from "@shared/types/models_endpoint";
+import type { ModelId } from "@shared/types/models_endpoint";
 import { findOrCreateOneCreator } from "./creator";
 import { findOrCreateOneModelType } from "./modelType";
-import { deleteOneModelVersion } from "./modelVersion";
-import { checkIfModelVersionOnDisk } from "@server/utils";
-import { getModelVersionPath } from "@server/fileStoreLayout";
-import { ModelTypes } from "@shared/types/baseModels/misc";
+import { LocalModelsRequestOpts } from "@shared/types/local/trpc_models";
 
 export async function findOrCreateOneModelId(modelId: ModelId) {
   const creatorRecord = modelId.creator
@@ -36,49 +33,69 @@ export async function findOrCreateOneModelId(modelId: ModelId) {
   return record;
 }
 
-export const defaultQuerySettings: ModelsRequestOpts = {
-  page: 1,
-  limit: 20,
-};
-
-export async function findManyModels(params: ModelsRequestOpts) {
-  const records = await getPrismaClient().model.findMany({
-    where: {
-      name: {
-        contains: params.query,
-      },
-      tags: {
-        some: {
-          name: { in: params.tag },
+export async function findManyModels(params: LocalModelsRequestOpts) {
+  const [records, totalCount] = await getPrismaClient().$transaction([
+    getPrismaClient().model.findMany({
+      where: {
+        name: {
+          contains: params.query,
         },
-      },
-      creator: {
-        username: params.username,
-      },
-      type: {
-        name: { in: params.types },
-      },
-      nsfw: params.nsfw,
-      modelVersions: {
-        some: {
-          baseModel: {
-            name: { in: params.baseModels },
+        tags: {
+          some: {
+            name: { in: params.tag },
+          },
+        },
+        creator: {
+          username: params.username,
+        },
+        type: {
+          name: { in: params.types },
+        },
+        nsfw: params.nsfw,
+        modelVersions: {
+          some: {
+            baseModel: {
+              name: { in: params.baseModels },
+            },
           },
         },
       },
-    },
-    skip:
-      params.page && params.limit
-        ? (params.page - 1) * params.limit
-        : (defaultQuerySettings.page! - 1) * defaultQuerySettings.limit!,
-    take: params.limit ?? defaultQuerySettings.limit!,
+      skip: (params.page - 1) * params.limit,
+      take: params.limit,
 
-    include: {
-      creator: true,
-      modelVersions: true,
-      tags: true,
-      type: true,
-    },
-  });
-  return records;
+      include: {
+        creator: true,
+        modelVersions: true,
+        tags: true,
+        type: true,
+      },
+    }),
+    getPrismaClient().model.count({
+      where: {
+        name: {
+          contains: params.query,
+        },
+        tags: {
+          some: {
+            name: { in: params.tag },
+          },
+        },
+        creator: {
+          username: params.username,
+        },
+        type: {
+          name: { in: params.types },
+        },
+        nsfw: params.nsfw,
+        modelVersions: {
+          some: {
+            baseModel: {
+              name: { in: params.baseModels },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+  return { records, totalCount };
 }

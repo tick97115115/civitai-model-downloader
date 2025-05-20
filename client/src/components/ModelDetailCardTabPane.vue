@@ -44,7 +44,7 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
     }
   }
   modelVersion.images.map(async (image, index) => {
-    const info = await trpcClient.media.getImagePath.mutate({
+    const info = await trpcClient.media.getMediaPath.mutate({
       modelId: modelId,
       versionId: modelVersion.id,
       imageId: image.id,
@@ -103,7 +103,7 @@ async function getImagePath(
   versionId: number,
   imgId: number
 ) {
-  const info = await trpcClient.media.getImagePath.mutate({
+  const info = await trpcClient.media.getMediaPath.mutate({
     modelId: modelId,
     versionId: versionId,
     imageId: imgId,
@@ -129,6 +129,7 @@ async function getImagePath(
       <el-col :xs="8" :sm="8">
         <el-space direction="vertical">
           <el-image
+            v-if="modelVersion.images.length > 0"
             :src="modelVersion.images[0]?.url"
             :zoom-rate="1.2"
             :max-scale="7"
@@ -139,6 +140,7 @@ async function getImagePath(
             fit="contain"
             lazy
           />
+          <el-empty v-else description="Have no preview images in json data." />
           <el-button
             type="primary"
             round

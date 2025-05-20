@@ -1,13 +1,18 @@
 import { router, publicProcedure } from "./trpc";
 import { type } from "arktype";
 import { model_id } from "@shared/types/models_endpoint";
-import { ModelIdLayout } from "../fileStoreLayout";
+import {
+  extractFilenameFromUrl,
+  getMediaDir,
+  ModelIdLayout,
+} from "../fileStoreLayout";
 import fileUrl from "file-url";
 import { pathExists } from "path-exists";
 import { getSettings } from "@server/settings";
+import { join } from "path";
 
 export const mediaRouter = router({
-  getImagePath: publicProcedure
+  getMediaPath: publicProcedure
     .input(
       type({
         modelId: model_id,
@@ -21,13 +26,13 @@ export const mediaRouter = router({
         params.input.modelId
       );
       const mvlayout = milayout.getModelVersionLayout(params.input.versionId);
-      const imagePath = mvlayout.getImagePath(params.input.imageId);
+      const mediaPath = mvlayout.getMediaPath(params.input.imageId);
       return {
-        imagePath,
-        imageFileName: mvlayout.getImageFileName(params.input.imageId),
-        imageFileDirPath: mvlayout.getImageFileDirPath(),
-        imageFileUrl: fileUrl(imagePath),
-        isExists: await pathExists(imagePath),
+        imagePath: mediaPath,
+        imageFileName: mvlayout.getMediaFileName(params.input.imageId),
+        imageFileDirPath: mvlayout.getMediaFileDirPath(),
+        imageFileUrl: fileUrl(mediaPath),
+        isExists: await pathExists(mediaPath),
       };
     }),
 });

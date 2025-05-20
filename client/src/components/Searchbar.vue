@@ -13,15 +13,9 @@ import {
 } from "@shared/types/baseModels/misc";
 
 defineProps<{
-  search(): Promise<void>;
+  search(params: ModelsRequestOpts): Promise<void>;
   search_params: ModelsRequestOpts;
 }>();
-
-const searchBarFocused = ref(false);
-
-function focusOnSearch() {
-  searchBarFocused.value = true;
-}
 </script>
 
 <template>
@@ -32,7 +26,7 @@ function focusOnSearch() {
           placeholder="Please input"
           v-model="search_params.query"
           class="input-with-select searchbar"
-          @keyup.enter="search"
+          @keyup.enter="search(search_params)"
         >
           <!-- <template #prepend>
           <el-select v-model="select" placeholder="Select" style="width: 115px">
@@ -42,7 +36,7 @@ function focusOnSearch() {
           </el-select>
         </template> -->
           <template #append>
-            <el-button @click="search">
+            <el-button @click="search(search_params)">
               <template #icon>
                 <el-icon><Search /></el-icon> </template
             ></el-button>
@@ -115,13 +109,6 @@ function focusOnSearch() {
           v-model="search_params.token"
           placeholder="Token"
         ></el-input>
-        <!-- <el-button
-          @click="
-            () => {
-              console.log(search_params);
-            }
-          "
-        ></el-button> -->
       </el-space>
     </el-popover>
   </div>

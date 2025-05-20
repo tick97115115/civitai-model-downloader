@@ -49,7 +49,7 @@ describe("test layout class", () => {
   });
 
   test("test get image path", () => {
-    expect(mvlayout.getImagePath(mimg.id)).eq(
+    expect(mvlayout.getMediaPath(mimg.id)).eq(
       join(mvlayout.imgDir, `${mimg.id}.${_.last(mimg.url.split("."))}`)
     );
   });

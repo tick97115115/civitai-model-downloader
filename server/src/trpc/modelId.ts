@@ -4,19 +4,29 @@ import { pathExists } from "path-exists";
 import fileUrl from "file-url";
 import {
   model_id,
-  models_request_opts,
-  ModelsResponse,
+  model_version,
+  ModelId,
 } from "@shared/types/models_endpoint";
+import type { LocalModelsResponse } from "@shared/types/local/trpc_models";
+import { local_models_request_opts } from "@shared/types/local/trpc_models";
 import type { ModelTypes } from "@shared/types/baseModels/misc";
-import { getModelVersionPath, ModelIdLayout } from "../fileStoreLayout";
-import { getSettings } from "@server/settings";
+import {
+  extractFilenameFromUrl,
+  getMediaDir,
+  getModelVersionPath,
+  ModelIdLayout,
+} from "../fileStoreLayout";
+import { getPrismaClient, getSettings } from "@server/settings";
 import { writeJsonFile } from "write-json-file";
 import { checkIfModelVersionOnDisk, hasSafetensorsFile } from "@server/utils";
-import {
-  defaultQuerySettings,
-  findManyModels,
-} from "@server/prisma/crud/modelId";
+import { findManyModels } from "@server/prisma/crud/modelId";
 import { deleteOneModelVersion } from "@server/prisma/crud/modelVersion";
+import { readFile } from "node:fs/promises";
+import {
+  getModelIdApiInfoJsonPath,
+  getModelVersionApiInfoJsonPath,
+} from "@server/fileStoreLayout";
+import { join } from "node:path";
 
 export const modelIdRouter = router({
   getModelIdApiInfoJsonPath: publicProcedure
@@ -91,9 +101,9 @@ export const modelIdRouter = router({
       return result;
     }),
   findLocalModels: publicProcedure
-    .input(models_request_opts)
+    .input(local_models_request_opts)
     .mutation(async (params) => {
-      let records = await findManyModels(params.input);
+      let result = await findManyModels(params.input);
 
       // check if modelversion in db have corresponding model file on disk, if not remove the record.
       let haveGhostRecord = false;
@@ -102,8 +112,8 @@ export const modelIdRouter = router({
       do {
         haveGhostRecord = false;
 
-        for (let i = 0; i < records.length; i++) {
-          const model = records[i];
+        for (let i = 0; i < result.records.length; i++) {
+          const model = result.records[i];
           for (let j = 0; j < model.modelVersions.length; j++) {
             const modelVersion = model.modelVersions[j];
             const modelVersionPath = getModelVersionPath(
@@ -123,14 +133,94 @@ export const modelIdRouter = router({
         }
 
         if (haveGhostRecord) {
-          records = await findManyModels(params.input);
+          result = await findManyModels(params.input);
         }
       } while (haveGhostRecord);
 
+      const items: Array<ModelId> = [];
+      for (let i = 0; i < result.records.length; i++) {
+        const mi = result.records[i];
+        const modelIdJsonFilePath = getModelIdApiInfoJsonPath(
+          getSettings().basePath,
+          mi.type.name as ModelTypes,
+          mi.id
+        );
+        if ((await pathExists(modelIdJsonFilePath)) === false) {
+          console.log(
+            `modelId ${mi.id}'s json file: ${modelIdJsonFilePath} not exists, will be exclude from process.`
+          );
+          continue;
+        }
+        const modelIdJsonFile = await readFile(modelIdJsonFilePath, {
+          encoding: "utf-8",
+        });
+        const modelIdJson = model_id(JSON.parse(modelIdJsonFile));
+        if (modelIdJson instanceof type.errors) {
+          console.log(
+            `parse modelId object failed, will be exclude from execution:`
+          );
+          console.log(modelIdJson.summary);
+          continue;
+        }
+
+        modelIdJson.modelVersions = [];
+        // iterates corresponding modelVersion objects
+        for (let j = 0; j < mi.modelVersions.length; j++) {
+          const mv = mi.modelVersions[j];
+          const modelVersionJsonFilePath = getModelVersionApiInfoJsonPath(
+            getSettings().basePath,
+            mi.type.name as ModelTypes,
+            mi.id,
+            mv.id
+          );
+          if ((await pathExists(modelVersionJsonFilePath)) === false) {
+            console.log(
+              `modelVersion ${mv.id}'s json file: ${modelVersionJsonFilePath} not exists, will be exclude from process.`
+            );
+            continue;
+          }
+          const modelVersionJsonFile = await readFile(
+            modelVersionJsonFilePath,
+            { encoding: "utf-8" }
+          );
+          const modelVersionJson = model_version(
+            JSON.parse(modelVersionJsonFile)
+          );
+          if (modelVersionJson instanceof type.errors) {
+            console.log(
+              `parse modelVersion object failed, will be exclude from execution:`
+            );
+            console.log(modelVersionJson.summary);
+            continue;
+          }
+
+          // replace images.url with local media cache if already downloaded
+          const imageDir = getMediaDir(getSettings().basePath);
+          for (let k = 0; k < modelVersionJson.images.length; k++) {
+            const image = modelVersionJson.images[k];
+            const imageFileName = extractFilenameFromUrl(image.url);
+            const imagePath = join(imageDir, imageFileName);
+            if (await pathExists(imagePath)) {
+              image.url = `/media/${imageFileName}`;
+            }
+          }
+          modelIdJson.modelVersions.push(modelVersionJson);
+        }
+
+        // push to items
+        items.push(modelIdJson);
+      }
+
       // construct a response
-      const modelsResponse: ModelsResponse = {
-        items: [],
-        metadata: {},
+      const modelsResponse: LocalModelsResponse = {
+        items: items,
+        metadata: {
+          totalItems: result.totalCount,
+          currentPage: params.input.page,
+          pageSize: params.input.limit,
+          totalPages: Math.ceil(result.totalCount / params.input.limit),
+        },
       };
+      return modelsResponse;
     }),
 });

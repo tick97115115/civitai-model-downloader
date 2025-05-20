@@ -1,5 +1,5 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { promises as fs } from "node:fs";
+import { join } from "node:path";
 import { pathExists } from "path-exists";
 import { getSettings } from "./settings";
 import fg from "fast-glob";
@@ -14,7 +14,7 @@ export async function hasSafetensorsFile(dirPath: string): Promise<boolean> {
     const files = await fs.readdir(dirPath);
 
     for (const file of files) {
-      const fullPath = path.join(dirPath, file);
+      const fullPath = join(dirPath, file);
       const stats = await fs.stat(fullPath);
 
       if (stats.isFile() && file.endsWith(".safetensors")) {

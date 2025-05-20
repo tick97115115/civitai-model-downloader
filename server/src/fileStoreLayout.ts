@@ -9,6 +9,8 @@ import type {
 } from "@shared/types/models_endpoint";
 import { ModelTypes } from "@shared/types/baseModels/misc";
 import { findModelVersion } from "@shared/types/utils";
+import { getSettings } from "./settings";
+import { pathExists } from "path-exists";
 /**
  * The layout of directory:
  * {baseDir} / {modelType} / {modelId} / {modelId}.api-info.json
@@ -23,7 +25,7 @@ import { findModelVersion } from "@shared/types/utils";
  * @returns The filename portion of the URL
  * @throws {Error} If the input is not a valid URL
  */
-function extractFilenameFromUrl(url: string): string {
+export function extractFilenameFromUrl(url: string): string {
   // Validate URL
   let parsedUrl: URL;
   try {
@@ -57,8 +59,12 @@ export function getModelIdPath(
   return join(normalize(basePath), modelType, modelId.toString());
 }
 
-export function getImageDir(basePath: string) {
+export function getMediaDir(basePath: string) {
   return join(basePath, "media");
+}
+
+export function getMediaFilePathByFileName(fileName: string) {
+  return join(getMediaDir(getSettings().basePath), fileName);
 }
 
 export function getApiInfoJsonFileName(id: number): string {
@@ -164,27 +170,27 @@ export class ModelVersionLayout {
     return join(join(this.getFileDirPath(), this.getFileName(fileId)));
   }
 
-  findImage(imageId: number): ModelVersionImage {
+  findMedia(mediaId: number): ModelVersionImage {
     const img = _.find(this.modelVersion.images, function (img) {
-      return img.id === imageId;
+      return img.id === mediaId;
     });
     if (img === undefined) {
-      throw new Error(`model have no file id: ${imageId}`);
+      throw new Error(`model have no file id: ${mediaId}`);
     }
     return img;
   }
 
-  getImageFileName(imageId: number): string {
-    const image = this.findImage(imageId);
-    return extractFilenameFromUrl(image.url);
+  getMediaFileName(mediaId: number): string {
+    const media = this.findMedia(mediaId);
+    return extractFilenameFromUrl(media.url);
   }
 
-  getImageFileDirPath(): string {
+  getMediaFileDirPath(): string {
     return this.imgDir;
   }
 
-  getImagePath(imageId: number): string {
-    return join(this.getImageFileDirPath(), this.getImageFileName(imageId));
+  getMediaPath(mediaId: number): string {
+    return join(this.getMediaFileDirPath(), this.getMediaFileName(mediaId));
   }
 }
 
@@ -197,7 +203,7 @@ export class ModelIdLayout {
       this.modelId.type,
       this.modelId.id
     );
-    this.imgDir = getImageDir(basePath);
+    this.imgDir = getMediaDir(basePath);
     this.modelId = modelId;
   }
 

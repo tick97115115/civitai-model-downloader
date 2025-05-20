@@ -38,7 +38,7 @@ export type ModelVersionFile = typeof modelVersion_file.infer;
 
 export const modelVersion_image = type({
   id: "number.integer",
-  url: "string.url",
+  url: "string",
   nsfwLevel: "number.integer",
   width: "number.integer",
   height: "number.integer",

@@ -33,7 +33,10 @@ const { setModelId, setModelDetailCardDisplay } = modelDetailStore;
   >
     <template #header>{{ modelId.name }}</template>
     <video
-      v-if="modelId.modelVersions[0]?.images[0]?.type !== 'image'"
+      v-if="
+        modelId.modelVersions[0]?.images[0]?.type !== 'image' &&
+        modelId.modelVersions[0]?.images.length > 0
+      "
       style="width: 100%"
       autoplay
       muted
@@ -41,11 +44,15 @@ const { setModelId, setModelDetailCardDisplay } = modelDetailStore;
       :src="modelId.modelVersions[0]?.images[0]?.url ?? null"
     ></video>
     <el-image
-      v-else
+      v-else-if="
+        modelId.modelVersions[0]?.images[0]?.type === 'image' &&
+        modelId.modelVersions[0]?.images.length > 0
+      "
       lazy
       :src="modelId.modelVersions[0]?.images[0]?.url ?? null"
       fit="cover"
     />
+    <el-empty v-else description="Have no preview images in json data." />
     <template #footer>
       <el-tag effect="dark" type="primary">{{
         `${modelId.modelVersions[0]?.baseModel}: ${modelId.modelVersions[0]?.baseModelType}`

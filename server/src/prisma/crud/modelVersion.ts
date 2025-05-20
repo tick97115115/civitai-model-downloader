@@ -14,6 +14,7 @@ import {
 } from "@server/fileStoreLayout";
 import type { ModelTypes } from "@shared/types/baseModels/misc";
 import { type } from "arktype";
+import { pathExists } from "path-exists";
 
 export async function upsertOneModelVersion(
   modelId: ModelId,
@@ -125,35 +126,39 @@ export async function scanModelsAndSyncToDb() {
       },
     });
     if (isExistsInDb === null) {
+      const modelVersionJsonPath = getModelVersionApiInfoJsonPath(
+        getSettings().basePath,
+        modelInfo.modelType as ModelTypes,
+        modelInfo.modelId,
+        modelInfo.versionId
+      );
+      if ((await pathExists(modelVersionJsonPath)) === false) {
+        console.log(
+          `modelVersion ${modelInfo.versionId}'s json file doesn't exists, exclude from processing.`
+        );
+        continue;
+      }
       const modelVersionInfo = model_version(
-        JSON.parse(
-          await readFile(
-            getModelVersionApiInfoJsonPath(
-              getSettings().basePath,
-              modelInfo.modelType as ModelTypes,
-              modelInfo.modelId,
-              modelInfo.versionId
-            ),
-            { encoding: "utf-8" }
-          )
-        )
+        JSON.parse(await readFile(modelVersionJsonPath, { encoding: "utf-8" }))
       );
       if (modelVersionInfo instanceof type.errors) {
         // hover out.summary to see validation errors
         // console.error(modelVersionInfo.summary)
         throw modelVersionInfo;
       }
+      const modelIdJsonPath = getModelIdApiInfoJsonPath(
+        getSettings().basePath,
+        modelInfo.modelType as ModelTypes,
+        modelInfo.modelId
+      );
+      if ((await pathExists(modelIdJsonPath)) === false) {
+        console.log(
+          `modelID ${modelInfo.modelId}'s json file doesn't exists, exclude from processing.`
+        );
+        continue;
+      }
       const modelIdInfo = model_id(
-        JSON.parse(
-          await readFile(
-            getModelIdApiInfoJsonPath(
-              getSettings().basePath,
-              modelInfo.modelType as ModelTypes,
-              modelInfo.modelId
-            ),
-            { encoding: "utf-8" }
-          )
-        )
+        JSON.parse(await readFile(modelIdJsonPath, { encoding: "utf-8" }))
       );
       if (modelIdInfo instanceof type.errors) {
         // hover out.summary to see validation errors
