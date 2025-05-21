@@ -66,6 +66,7 @@
     "fast-glob": "^3.3.3",
     "file-type": "^20.5.0",
     "file-url": "^4.0.0",
+    "get-stream": "^9.0.1",
     "hono-openapi": "^0.4.8",
     "ky": "^1.8.1",
     "lodash-es": "^4.17.21",

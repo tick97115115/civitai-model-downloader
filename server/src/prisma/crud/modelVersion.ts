@@ -50,6 +50,32 @@ export async function upsertOneModelVersion(
       baseModelTypeId: baseModelTypeRecord ? baseModelTypeRecord.id : undefined,
       publishedAt: modelVersion.publishedAt ?? undefined,
       nsfwLevel: modelVersion.nsfwLevel,
+      images: {
+        connectOrCreate: modelVersion.images.map((image) => ({
+          where: { id: image.id },
+          create: {
+            id: image.id,
+            url: image.url,
+            nsfwLevel: image.nsfwLevel,
+            width: image.width,
+            height: image.height,
+            hash: image.hash,
+            type: image.type,
+          },
+        })),
+      },
+      files: {
+        connectOrCreate: modelVersion.files.map((file) => ({
+          where: { id: file.id },
+          create: {
+            id: file.id,
+            sizeKB: file.sizeKB,
+            name: file.name,
+            type: file.type,
+            downloadUrl: file.downloadUrl,
+          },
+        })),
+      },
     },
   });
 

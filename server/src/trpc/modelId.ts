@@ -194,6 +194,28 @@ export const modelIdRouter = router({
             continue;
           }
 
+          // at start check if images is empty, if empty, insert db records
+          if (modelVersionJson.images.length === 0) {
+            const modelVersionImages =
+              await getPrismaClient().modelVersionImage.findMany({
+                where: {
+                  modelVersionId: modelVersionJson.id,
+                },
+              });
+            for (let k = 0; k < modelVersionImages.length; k++) {
+              const image = modelVersionImages[k];
+              modelVersionJson.images.push({
+                id: image.id,
+                nsfwLevel: image.nsfwLevel,
+                url: image.url,
+                width: image.width,
+                height: image.height,
+                hash: image.hash,
+                type: image.type,
+              });
+            }
+          }
+
           // replace images.url with local media cache if already downloaded
           const imageDir = getMediaDir(getSettings().basePath);
           for (let k = 0; k < modelVersionJson.images.length; k++) {

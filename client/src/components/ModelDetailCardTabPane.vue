@@ -2,10 +2,13 @@
 import clipboard from "clipboardy";
 import { Picture, Document, Box, CopyDocument } from "@element-plus/icons-vue";
 import type { ModelId, ModelVersion } from "@shared/types/models_endpoint";
+import { model_id, model_version } from "@shared/types/models_endpoint";
 import { ElMessage } from "element-plus";
 import { trpcClient } from "@/utils/trpcClient";
 import type { Client } from "@gopeed/rest";
 import ModelDetailCardTabPaneFilesTable from "@/components/ModelDetailCardTabPaneFilesTable.vue";
+import { type } from "arktype";
+import { ref } from "vue";
 
 const { gopeedClient, modelId, CivtAI_Token } = defineProps<{
   modelId: ModelId;
@@ -13,7 +16,97 @@ const { gopeedClient, modelId, CivtAI_Token } = defineProps<{
   CivtAI_Token: string;
 }>();
 
+/**
+ * 将参数对象拼接到现有URL作为查询参数
+ * @param baseUrl 基础URL
+ * @param params 参数对象
+ * @param encode 是否对参数进行编码（默认true）
+ * @returns 拼接后的完整URL字符串
+ */
+function appendQueryParams(
+  baseUrl: string,
+  params: Record<string, any>,
+  encode: boolean = true
+): string {
+  // 创建URL对象（浏览器环境支持）
+  const url = new URL(baseUrl, window.location.origin);
+
+  // 遍历参数对象
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+
+    // 处理数组参数
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        url.searchParams.append(key, String(item));
+      });
+    } else {
+      // 处理普通参数
+      if (encode) {
+        url.searchParams.append(key, String(value));
+      } else {
+        // 如果不编码，直接添加到search字符串
+        const separator = url.search ? "&" : "?";
+        url.search += `${separator}${key}=${value}`;
+      }
+    }
+  }
+
+  return url.toString();
+}
+
+async function TryToFetchImagesFromModelIdEndpoint(
+  modelId: ModelId,
+  modelVersion: ModelVersion
+) {
+  ElMessage({
+    message: `Fetching images from modelId endpoint...`,
+    type: "info",
+  });
+  const result = await trpcClient.media.getImagesFromModelIdEndpoint.mutate({
+    modelId: modelId,
+    modelVersion: modelVersion,
+  });
+
+  result.map(async (image, index) => {
+    const info = await trpcClient.media.getMediaPathByUrl.mutate({
+      url: image.url,
+    });
+    if (info.isExists === false) {
+      await gopeedClient.createTask({
+        req: { url: image.url },
+        opt: { path: info.mediaFilePath, name: info.mediaFileName },
+      });
+      ElMessage({
+        message: `Added image ${image.id} into task list.`,
+        type: "success",
+      });
+    } else {
+      ElMessage({
+        message: `Image ${image.id} already exists.`,
+        type: "warning",
+      });
+    }
+  });
+}
+
 async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
+  // validate modelId and modelVersion
+  const miOut = model_id(modelId);
+  const mvOut = model_version(modelVersion);
+  if (miOut instanceof type.errors) {
+    ElMessage({
+      message: `ModelId is invalid! ${miOut.summary}`,
+      type: "error",
+    });
+    if (mvOut instanceof type.errors) {
+      ElMessage({
+        message: `ModelVersion is invalid! ${mvOut.summary}`,
+        type: "error",
+      });
+    }
+    return;
+  }
   // download files
   for (let index = 0; index < modelVersion.files.length; index++) {
     const file = modelVersion.files[index];
@@ -23,7 +116,7 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
       fileId: file.id,
     });
     if (info.isExists === false) {
-      const url = `${file.downloadUrl}?token=${CivtAI_Token}`;
+      const url = appendQueryParams(file.downloadUrl, { token: CivtAI_Token });
       console.log(`this is the resource uri I get from trpc: ${url}`);
 
       const res = await trpcClient.modelFile.getFileResourceUrl.query({
@@ -113,6 +206,7 @@ async function getImagePath(
     type: "success",
   });
 }
+const showPreview = ref(false);
 </script>
 
 <template>
@@ -125,22 +219,55 @@ async function getImagePath(
       <span>{{ modelVersion.name }}</span>
     </template>
 
+    <el-image-viewer
+      v-if="showPreview"
+      :url-list="modelVersion.images.map((img, index) => img.url)"
+      show-progress
+      :initial-index="1"
+      @close="showPreview = false"
+    />
+
     <el-row :gutter="20">
       <el-col :xs="8" :sm="8">
         <el-space direction="vertical">
           <el-image
-            v-if="modelVersion.images.length > 0"
+            v-if="
+              modelVersion.images[0].type === 'image' &&
+              modelVersion.images.length > 0
+            "
             :src="modelVersion.images[0]?.url"
             :zoom-rate="1.2"
             :max-scale="7"
             :min-scale="0.2"
             show-progress
             :initial-index="0"
-            :preview-src-list="modelVersion.images.map((img, index) => img.url)"
             fit="contain"
             lazy
+            @click="showPreview = true"
           />
+          <video
+            v-else-if="
+              modelId.modelVersions[0]?.images[0]?.type !== 'image' &&
+              modelId.modelVersions[0]?.images.length > 0
+            "
+            style="width: 100%"
+            autoplay
+            muted
+            loop
+            :src="modelId.modelVersions[0]?.images[0]?.url ?? null"
+            @click="showPreview = true"
+          ></video>
           <el-empty v-else description="Have no preview images in json data." />
+
+          <el-button
+            type="primary"
+            round
+            :icon="Picture"
+            @click="TryToFetchImagesFromModelIdEndpoint(modelId, modelVersion)"
+          >
+            >no previews in json? 🛠️</el-button
+          >
+
           <el-button
             type="primary"
             round

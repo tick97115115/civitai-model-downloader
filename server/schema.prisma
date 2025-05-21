@@ -89,9 +89,35 @@ model ModelVersion {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  model         Model          @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  baseModel     BaseModel      @relation(fields: [baseModelId], references: [id])
-  baseModelType BaseModelType? @relation(fields: [baseModelTypeId], references: [id])
+  model         Model               @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  baseModel     BaseModel           @relation(fields: [baseModelId], references: [id])
+  baseModelType BaseModelType?      @relation(fields: [baseModelTypeId], references: [id])
+  files         ModelVersionFile[]
+  images        ModelVersionImage[]
 
   @@index([modelId, name, baseModelId, baseModelTypeId, publishedAt, nsfwLevel])
+}
+
+model ModelVersionFile {
+  id          Int    @id
+  sizeKB      Float
+  name        String
+  type        String
+  downloadUrl String
+
+  modelVersionId Int
+  modelVersion   ModelVersion @relation(fields: [modelVersionId], references: [id], onDelete: Cascade)
+}
+
+model ModelVersionImage {
+  id        Int    @id
+  url       String
+  nsfwLevel Int
+  width     Int
+  height    Int
+  hash      String
+  type      String
+
+  modelVersionId Int
+  modelVersion   ModelVersion @relation(fields: [modelVersionId], references: [id], onDelete: Cascade)
 }
