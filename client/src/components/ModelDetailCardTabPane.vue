@@ -206,12 +206,11 @@ async function getImagePath(
     type: "success",
   });
 }
-const showPreview = ref(false);
 </script>
 
 <template>
   <el-tab-pane
-    v-for="modelVersion in modelId?.modelVersions"
+    v-for="modelVersion in modelId.modelVersions"
     :key="modelVersion.id"
     :name="modelVersion.id"
   >
@@ -219,19 +218,12 @@ const showPreview = ref(false);
       <span>{{ modelVersion.name }}</span>
     </template>
 
-    <el-image-viewer
-      v-if="showPreview"
-      :url-list="modelVersion.images.map((img, index) => img.url)"
-      show-progress
-      :initial-index="1"
-      @close="showPreview = false"
-    />
-
     <el-row :gutter="20">
       <el-col :xs="8" :sm="8">
         <el-space direction="vertical">
           <el-image
             v-if="
+              modelVersion.images[0].type &&
               modelVersion.images[0].type === 'image' &&
               modelVersion.images.length > 0
             "
@@ -243,7 +235,7 @@ const showPreview = ref(false);
             :initial-index="0"
             fit="contain"
             lazy
-            @click="showPreview = true"
+            :preview-src-list="modelVersion.images.map((img, index) => img.url)"
           />
           <video
             v-else-if="
@@ -255,7 +247,6 @@ const showPreview = ref(false);
             muted
             loop
             :src="modelId.modelVersions[0]?.images[0]?.url ?? null"
-            @click="showPreview = true"
           ></video>
           <el-empty v-else description="Have no preview images in json data." />
 

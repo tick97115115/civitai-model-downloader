@@ -14,15 +14,15 @@ export const useModelDetailStore = defineStore("modelDetail", () => {
   };
   const activeVersionId = ref<number | null>(null);
   watch(modelId, (newModelId, oldModelId) => {
-    activeVersionId.value = modelId.value?.modelVersions[0]?.id ?? null
-    console.log(`initial tab modelVersion id is: ${activeVersionId.value}`)
-  })
+    activeVersionId.value = modelId.value?.modelVersions[0]?.id ?? null;
+    console.log(`initial tab modelVersion id is: ${activeVersionId.value}`);
+  });
 
   return {
     modelId,
     setModelId,
     modelDetailCardDisplay,
     setModelDetailCardDisplay,
-    activeVersionId
+    activeVersionId,
   };
 });
