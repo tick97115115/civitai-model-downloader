@@ -41,7 +41,7 @@ export const civitaiApiRouter = router({
       if (!res.ok) {
         const result: ModelsEndpointRes = {
           code: 500,
-          message: `failed`,
+          message: `response is not ok\n${res.status} ${res.statusText}`,
         };
         return result;
       }

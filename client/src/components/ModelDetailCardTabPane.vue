@@ -10,6 +10,8 @@ import ModelDetailCardTabPaneFilesTable from "@/components/ModelDetailCardTabPan
 import { type } from "arktype";
 import { ref } from "vue";
 
+const showPreview = ref(false);
+
 const { gopeedClient, modelId, CivtAI_Token } = defineProps<{
   modelId: ModelId;
   gopeedClient: Client;
@@ -218,13 +220,32 @@ async function getImagePath(
       <span>{{ modelVersion.name }}</span>
     </template>
 
+    <el-image-viewer
+      v-if="showPreview"
+      :url-list="modelVersion.images.map((img, index) => img.url)"
+      show-progress
+      :initial-index="0"
+      @close="showPreview = false"
+    />
+
     <el-row :gutter="20">
       <el-col :xs="8" :sm="8">
         <el-space direction="vertical">
-          <el-image
+          <video
             v-if="
-              modelVersion.images[0].type &&
-              modelVersion.images[0].type === 'image' &&
+              modelVersion.images[0]?.type !== 'image' &&
+              modelVersion.images.length > 0
+            "
+            style="width: 100%"
+            autoplay
+            muted
+            loop
+            :src="modelVersion.images[0]?.url ?? null"
+            @click="showPreview = true"
+          ></video>
+          <el-image
+            v-else-if="
+              modelVersion.images[0]?.type === 'image' &&
               modelVersion.images.length > 0
             "
             :src="modelVersion.images[0]?.url"
@@ -232,22 +253,11 @@ async function getImagePath(
             :max-scale="7"
             :min-scale="0.2"
             show-progress
-            :initial-index="0"
             fit="contain"
             lazy
-            :preview-src-list="modelVersion.images.map((img, index) => img.url)"
+            @click="showPreview = true"
           />
-          <video
-            v-else-if="
-              modelId.modelVersions[0]?.images[0]?.type !== 'image' &&
-              modelId.modelVersions[0]?.images.length > 0
-            "
-            style="width: 100%"
-            autoplay
-            muted
-            loop
-            :src="modelId.modelVersions[0]?.images[0]?.url ?? null"
-          ></video>
+
           <el-empty v-else description="Have no preview images in json data." />
 
           <el-button

@@ -34,31 +34,42 @@ async function searchCivitAI(params: ModelsRequestOpts) {
   // scroll back to top position
   const gallery_ele = document.querySelector("#gallery") as HTMLElement;
   gallery_ele.scrollTop = 0;
+  try {
+    // send request
+    const res = await trpcClient.civitaiApi.models.mutate(params);
 
-  // send request
-  const res = await trpcClient.civitaiApi.models.mutate(params);
+    if (res.code === 200) {
+      ElMessage({
+        message: res.message,
+        type: "success",
+      });
+      const data = res.data!;
 
-  if (res.code === 200) {
+      civitai_model_ids.value = data.items;
+      next_page.value = data.metadata.nextPage ?? null;
+      console.log(next_page.value);
+
+      loading.value = false;
+      infiniteScrollDisabled.value = false;
+      return;
+    } else {
+      // hover out.summary to see validation errors
+      ElMessage({
+        message: res.message,
+        type: "warning",
+      });
+      loading.value = false;
+    }
+  } catch (error) {
+    console.log("Error occurred while searching CivitAI:");
+    console.error(error);
     ElMessage({
-      message: res.message,
-      type: "success",
+      message: "An error occurred while searching CivitAI.",
+      type: "error",
     });
-    const data = res.data!;
-
-    civitai_model_ids.value = data.items;
-    next_page.value = data.metadata.nextPage ?? null;
-    console.log(next_page.value);
-
+  } finally {
     loading.value = false;
     infiniteScrollDisabled.value = false;
-    return;
-  } else {
-    // hover out.summary to see validation errors
-    ElMessage({
-      message: res.message,
-      type: "warning",
-    });
-    loading.value = false;
   }
 }
 
@@ -158,11 +169,11 @@ async function localJumpTo(page: number) {
           <el-main style="overflow: auto">
             <el-row :gutter="10">
               <el-col
-                :xs="8"
-                :sm="6"
-                :md="5"
-                :lg="4"
-                :xl="3"
+                :xs="2"
+                :sm="3"
+                :md="4"
+                :lg="6"
+                :xl="8"
                 v-for="model_id in local_model_ids"
                 :key="model_id.id"
               >
