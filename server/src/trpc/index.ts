@@ -5,6 +5,7 @@ import { modelIdRouter } from "./modelId";
 import { modelVersionRouter } from "./modelVersion";
 import { settingsRouter } from "./settings";
 import { civitaiApiRouter } from "./civitaiApi";
+import { tagsRouter } from "./tags";
 
 export const appRouter = router({
   modelFile: modelFileRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   modelVersion: modelVersionRouter,
   settings: settingsRouter,
   civitaiApi: civitaiApiRouter,
+  tags: tagsRouter,
 });
 
 // Export type router type signature,

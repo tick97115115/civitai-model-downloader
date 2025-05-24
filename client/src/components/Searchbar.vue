@@ -2,6 +2,7 @@
 import { reactive, ref } from "vue";
 import { ModelsRequestOpts } from "@shared/types/models_endpoint";
 import { User, Key } from "@element-plus/icons-vue";
+import { trpcClient } from "@/utils/trpcClient";
 import { ElMessage } from "element-plus";
 import {
   model_types,
@@ -17,6 +18,19 @@ defineProps<{
   search(params: ModelsRequestOpts): Promise<void>;
   search_params: ModelsRequestOpts;
 }>();
+
+const tags = ref<string[]>([]);
+
+const remoteMethod = async (query: string) => {
+  if (query) {
+    // loading.value = true
+
+    tags.value = await trpcClient.tags.searchTag.query({ tag: query });
+    // loading.value = false
+  } else {
+    tags.value = [];
+  }
+};
 </script>
 
 <template>
@@ -63,6 +77,7 @@ defineProps<{
             ></el-option
           >
         </el-select>
+
         <el-select
           v-model="search_params.baseModels"
           clearable
@@ -80,6 +95,29 @@ defineProps<{
             ></el-option
           >
         </el-select>
+
+        <el-select
+          v-model="search_params.tag"
+          clearable
+          :teleported="false"
+          filterable
+          reserve-keyword
+          :remote-method="remoteMethod"
+          multiple
+          remote
+          placeholder="Tags"
+        >
+          <el-option
+            v-for="item in tags"
+            :key="item"
+            :label="item"
+            :value="item"
+          >
+            {{ item }}
+            ></el-option
+          >
+        </el-select>
+
         <el-input
           :prefix-icon="User"
           v-model="search_params.username"
