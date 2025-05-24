@@ -10,6 +10,7 @@ import {
   ModelTypesArray,
   ModelsRequestPeriodArray,
   ModelsRequestSortArray,
+  BaseModelsArray,
 } from "@shared/types/baseModels/misc";
 
 defineProps<{
@@ -54,6 +55,23 @@ defineProps<{
         >
           <el-option
             v-for="item in ModelTypesArray"
+            :key="item"
+            :label="item"
+            :value="item"
+          >
+            {{ item }}
+            ></el-option
+          >
+        </el-select>
+        <el-select
+          v-model="search_params.baseModels"
+          clearable
+          :teleported="false"
+          multiple
+          placeholder="base model types"
+        >
+          <el-option
+            v-for="item in BaseModelsArray"
             :key="item"
             :label="item"
             :value="item"

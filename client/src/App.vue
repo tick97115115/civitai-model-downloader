@@ -168,12 +168,12 @@ async function localJumpTo(page: number) {
         <el-container style="height: 100%">
           <el-main style="overflow: auto">
             <el-row :gutter="10">
-              <el-col
-                :xs="2"
-                :sm="3"
-                :md="4"
-                :lg="6"
-                :xl="8"
+              <!-- 48 _ 8,6,4,3,2 --><el-col
+                :xs="12"
+                :sm="8"
+                :md="6"
+                :lg="4"
+                :xl="3"
                 v-for="model_id in local_model_ids"
                 :key="model_id.id"
               >
@@ -208,9 +208,9 @@ async function localJumpTo(page: number) {
         style="overflow: auto; height: 86vh"
       >
         <el-col
-          :xs="8"
-          :sm="6"
-          :md="5"
+          :xs="12"
+          :sm="8"
+          :md="6"
           :lg="4"
           :xl="3"
           v-for="model_id in civitai_model_ids"
