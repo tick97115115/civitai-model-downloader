@@ -376,8 +376,12 @@ async function getImagePath(
               :model-version="modelVersion"
               :gopeed-client="gopeedClient"
               :-civt-a-i_-token="CivtAI_Token"
-            ></ModelDetailCardTabPaneFilesTable
-          ></el-container>
+            ></ModelDetailCardTabPaneFilesTable>
+          </el-container>
+          <div
+            v-if="modelVersion.description"
+            v-html="modelVersion.description"
+          ></div>
         </el-space>
       </el-col>
     </el-row>

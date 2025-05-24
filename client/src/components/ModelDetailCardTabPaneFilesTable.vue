@@ -18,19 +18,15 @@ function removeFileExtension(filename: string): string {
   return lastDotIndex === -1 ? filename : filename.substring(0, lastDotIndex);
 }
 
-async function getSDWebuiLoraName(
-  modelId: ModelId,
-  versionId: number,
-  index: number
-) {
+async function getSDWebuiLoraName(index: number) {
   const info = await trpcClient.modelFile.getFilePath.mutate({
     modelId: modelId,
-    versionId: versionId,
+    versionId: modelVersion.id,
     fileId: modelVersion.files[index].id,
   });
-  const loraString = `<lora:${removeFileExtension(
-    modelVersion.files[index].name
-  )}:1>`;
+  const loraString = `<lora:${
+    modelVersion.files[index].id
+  }_${removeFileExtension(modelVersion.files[index].name)}:1>`;
   await clipboard.write(loraString);
   ElMessage({
     message: `Copied!: \n${loraString}`,
@@ -67,9 +63,7 @@ async function downloadFile(index: number) {
           <el-button
             type="primary"
             size="small"
-            @click.prevent="
-              getSDWebuiLoraName(modelId, modelVersion.id, scope.$index)
-            "
+            @click="getSDWebuiLoraName(scope.$index)"
           >
             Copy </el-button
           ><el-button
