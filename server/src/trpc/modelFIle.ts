@@ -41,36 +41,43 @@ export const modelFileRouter = router({
       })
     )
     .query(async (params) => {
-      try {
-        const res = await getKy().get(params.input.url, {
-          timeout: 60000,
-        });
-        if (!res.ok) {
-          throw new Error(`Fetch error: ${res.statusText}`);
-        }
-        const data: GetFileResourceUrlRes = {
-          code: 200,
-          message: "success",
-          downloadUrl: res.url,
-        };
-        return data;
-      } catch (error) {
-        // @ts-ignore
-        if (error.name === "TimeoutError") {
+      const res = await getKy().get(params.input.url, {
+        timeout: 60000,
+        throwHttpErrors: false,
+      });
+      if (res.status !== 200) {
+        if (res.status === 401) {
+          console.error("resolve resource url failed", res.statusText);
           const data: GetFileResourceUrlRes = {
-            code: 408,
-            message: "timeout",
+            code: 401,
+            message:
+              "Unauthorized, may you have to purchase the model on civitai.",
             downloadUrl: "",
           };
           return data;
-        } else {
+        } else if (res.status === 408) {
+          console.error("resolve resource url failed", res.statusText);
+          const data: GetFileResourceUrlRes = {
+            code: 408,
+            message: `timeout, ${res.statusText}`,
+            downloadUrl: "",
+          };
+          return data;
+        } else if (res.status <= 200 || res.status > 299) {
+          console.error("resolve resource url failed", res.statusText);
           const data: GetFileResourceUrlRes = {
             code: 500,
-            message: "unknown error",
+            message: `resolve resource url failed with unknown error: ${res.statusText}`,
             downloadUrl: "",
           };
           return data;
         }
       }
+      const data: GetFileResourceUrlRes = {
+        code: 200,
+        message: "success",
+        downloadUrl: res.url,
+      };
+      return data;
     }),
 });

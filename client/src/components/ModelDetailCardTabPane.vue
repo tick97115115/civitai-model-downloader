@@ -18,43 +18,18 @@ const { gopeedClient, modelId, CivtAI_Token } = defineProps<{
   CivtAI_Token: string;
 }>();
 
-/**
- * 将参数对象拼接到现有URL作为查询参数
- * @param baseUrl 基础URL
- * @param params 参数对象
- * @param encode 是否对参数进行编码（默认true）
- * @returns 拼接后的完整URL字符串
- */
-function appendQueryParams(
-  baseUrl: string,
-  params: Record<string, any>,
-  encode: boolean = true
-): string {
-  // 创建URL对象（浏览器环境支持）
-  const url = new URL(baseUrl, window.location.origin);
+function insertTokenParam(url: string, token: string) {
+  console.log(
+    `this is the url I get from trpc: ${url}\n this is the token: ${token}`
+  );
+  // 创建一个URL对象以便更容易地处理各部分
+  const urlObj = new URL(url);
 
-  // 遍历参数对象
-  for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === null) continue;
-
-    // 处理数组参数
-    if (Array.isArray(value)) {
-      value.forEach((item) => {
-        url.searchParams.append(key, String(item));
-      });
-    } else {
-      // 处理普通参数
-      if (encode) {
-        url.searchParams.append(key, String(value));
-      } else {
-        // 如果不编码，直接添加到search字符串
-        const separator = url.search ? "&" : "?";
-        url.search += `${separator}${key}=${value}`;
-      }
-    }
-  }
-
-  return url.toString();
+  // 添加或更新token参数
+  urlObj.searchParams.set("token", token);
+  console.log(`this is the url I get after adding token: ${urlObj.toString()}`);
+  // 返回完整的URL字符串
+  return urlObj.toString();
 }
 
 async function TryToFetchImagesFromModelIdEndpoint(
@@ -118,18 +93,27 @@ async function downloadAll(modelId: ModelId, modelVersion: ModelVersion) {
       fileId: file.id,
     });
     if (info.isExists === false) {
-      const url = appendQueryParams(file.downloadUrl, { token: CivtAI_Token });
+      const url = insertTokenParam(file.downloadUrl, CivtAI_Token);
       console.log(`this is the resource uri I get from trpc: ${url}`);
 
       const res = await trpcClient.modelFile.getFileResourceUrl.query({
         url: url,
       });
-      if (res.code === 408) {
+      if (res.code === 401) {
         ElMessage({
+          duration: 5000,
+          message: res.message,
+          type: "warning",
+        });
+        return;
+      }
+      if (res.code !== 200) {
+        ElMessage({
+          duration: 5000,
           message: res.message,
           type: "error",
         });
-        continue;
+        return;
       }
       console.log(`This is the resolved uri: ${res.downloadUrl}`);
       await gopeedClient.createTask({
