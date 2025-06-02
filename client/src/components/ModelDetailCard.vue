@@ -17,13 +17,9 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
 </script>
 
 <template>
-  <el-dialog
-    v-model="modelDetailCardDisplay"
-    title="Shipping address"
-    width="800"
-  >
+  <el-dialog v-model="modelDetailCardDisplay" align-center width="1000">
     <el-card v-if="modelId !== null">
-      <template #header>
+      <!-- <template #header>
         <div class="card-header">
           <a
             class="clickable-title"
@@ -32,7 +28,7 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
             >{{ modelId.name }}</a
           >
         </div>
-      </template>
+      </template> -->
       <el-tabs
         class="demo-tabs"
         @tab-click="handleClick"

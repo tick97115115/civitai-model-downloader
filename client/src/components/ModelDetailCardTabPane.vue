@@ -7,8 +7,14 @@ import { ElMessage } from "element-plus";
 import { trpcClient } from "@/utils/trpcClient";
 import type { Client } from "@gopeed/rest";
 import ModelDetailCardTabPaneFilesTable from "@/components/ModelDetailCardTabPaneFilesTable.vue";
+import ModelDetailCardDescriptionView from "@/components/ModelDetailCardDescription.vue";
 import { type } from "arktype";
 import { ref } from "vue";
+import { useModelDetailStore } from "@/stores/modelDetail";
+import { storeToRefs } from "pinia";
+
+const modelDetailStore = useModelDetailStore();
+const { activeVersionId } = storeToRefs(modelDetailStore);
 
 const showPreview = ref(false);
 
@@ -278,8 +284,17 @@ async function getImagePath(
           >
         </el-space>
       </el-col>
-      <el-col :xs="16" :sm="16">
+      <el-col :xs="16" :sm="16" style="overflow: auto; height: 80vh">
         <el-space direction="vertical" style="width: 100%" :fill="true">
+          <div class="card-header">
+            <a
+              class="clickable-title"
+              target="_blank"
+              :href="`https://civitai.com/models/${modelId.id}?modelVersionId=${activeVersionId}`"
+              >{{ modelId.name }}</a
+            >
+          </div>
+
           <el-descriptions
             border
             title="Details"
@@ -354,20 +369,44 @@ async function getImagePath(
             </el-descriptions-item>
           </el-descriptions>
 
-          <el-container style="width: 100%">
-            <ModelDetailCardTabPaneFilesTable
-              :model-id="modelId"
-              :model-version="modelVersion"
-              :gopeed-client="gopeedClient"
-              :-civt-a-i_-token="CivtAI_Token"
-            ></ModelDetailCardTabPaneFilesTable>
-          </el-container>
-          <div
-            v-if="modelVersion.description"
-            v-html="modelVersion.description"
-          ></div>
+          <ModelDetailCardTabPaneFilesTable
+            :model-id="modelId"
+            :model-version="modelVersion"
+            :gopeed-client="gopeedClient"
+            :-civt-a-i_-token="CivtAI_Token"
+          ></ModelDetailCardTabPaneFilesTable>
+          <div v-if="modelVersion.description">
+            <h2>Model Version Description</h2>
+            <!-- <iframe
+              :srcdoc="modelVersion.description"
+              frameborder="0"
+              class="inserted-html"
+            ></iframe> -->
+            <ModelDetailCardDescriptionView
+              :external-html="modelVersion.description"
+            ></ModelDetailCardDescriptionView>
+          </div>
+          <el-divider />
+          <div v-if="modelId.description">
+            <h2>Model Description</h2>
+            <!-- <iframe
+              :srcdoc="modelId.description"
+              frameborder="0"
+              class="inserted-html"
+            ></iframe> -->
+            <ModelDetailCardDescriptionView
+              :external-html="modelId.description"
+            ></ModelDetailCardDescriptionView>
+          </div>
         </el-space>
       </el-col>
     </el-row>
   </el-tab-pane>
 </template>
+
+<style lang="scss" scoped>
+.inserted-html {
+  width: 100%;
+  height: 100%;
+}
+</style>

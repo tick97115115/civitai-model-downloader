@@ -1,11 +1,11 @@
 import type { ModelId, ModelVersion } from "@shared/types/models_endpoint";
-import _ from "lodash";
+import { find } from "lodash-es";
 
 export function findModelVersion(
   modelId: ModelId,
   modelVersionId: number
 ): ModelVersion {
-  const modelVersion = _.find(modelId.modelVersions, function (mv) {
+  const modelVersion = find(modelId.modelVersions, function (mv) {
     return mv.id === modelVersionId;
   });
   if (modelVersion === undefined) {

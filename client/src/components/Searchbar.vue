@@ -40,7 +40,7 @@ const remoteMethod = async (query: string) => {
         <el-input
           placeholder="Please input"
           v-model="search_params.query"
-          class="input-with-select searchbar"
+          class="searchbar"
           @keyup.enter="search(search_params)"
         >
           <!-- <template #prepend>
@@ -100,6 +100,7 @@ const remoteMethod = async (query: string) => {
           v-model="search_params.tag"
           clearable
           :teleported="false"
+          allow-create
           filterable
           reserve-keyword
           :remote-method="remoteMethod"

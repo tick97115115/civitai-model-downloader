@@ -3,5 +3,6 @@
     "[vue]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.indentSize": 2,
-    }
+    },
+    "idf.pythonInstallPath": "C:\\Users\\APboi\\.espressif\\tools\\idf-python\\3.11.2\\python.exe"
 }
