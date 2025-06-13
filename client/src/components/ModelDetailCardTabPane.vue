@@ -367,6 +367,20 @@ async function getImagePath(
                 {{ words }}</el-check-tag
               >
             </el-descriptions-item>
+            <el-descriptions-item v-if="modelId.creator">
+              <template #label>
+                <b>Creator</b>
+              </template>
+              {{ modelId.creator.username }}
+            </el-descriptions-item>
+            <el-descriptions-item v-if="modelId.tags.length > 0">
+              <template #label>
+                <b>Tags</b>
+              </template>
+              <el-tag type="primary" v-for="tag in modelId.tags">{{
+                tag
+              }}</el-tag>
+            </el-descriptions-item>
           </el-descriptions>
 
           <ModelDetailCardTabPaneFilesTable
